@@ -27,8 +27,6 @@ spec:
         node-role.kubernetes.io/master: ""
       serviceAccountName: contrail-operator
       hostNetwork: true
-      imagePullSecrets:
-      - name: contrail-registry
       tolerations:
         - effect: NoExecute
           operator: Exists
@@ -37,7 +35,7 @@ spec:
       containers:
         - name: contrail-operator
           # Replace this with the built image name
-          image: hub.juniper.net/contrail-nightly/contrail-operator:<CONTRAIL_VERSION>
+          image: steigenhaus/contrail-operator:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE

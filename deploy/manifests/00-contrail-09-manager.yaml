@@ -9,8 +9,6 @@ spec:
     nodeSelector:
       node-role.kubernetes.io/master: ""
     keystoneSecretInstance : cluster1-admin-password
-    imagePullSecrets:
-      - contrail-registry
   services:
     cassandras:
     - metadata:
@@ -21,11 +19,11 @@ spec:
         serviceConfiguration:
           containers:
             - name: cassandra
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/cassandra:3.11.4
+              image: cassandra:3.11.4
             - name: init
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/python:3.8.2-alpine
+              image: python:3.8.2-alpine
             - name: init2
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/cassandra:3.11.4
+              image: cassandra:3.11.4
     config:
       metadata:
         labels:
@@ -40,37 +38,37 @@ spec:
           analyticsStatisticsTTL: 2
           containers:
             - name: analyticsapi
-              image: <CONTRAIL_REGISTRY>/contrail-analytics-api:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-analytics-api:latest
             - name: api
-              image: <CONTRAIL_REGISTRY>/contrail-controller-config-api:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-controller-config-api:latest
             - name: collector
-              image: <CONTRAIL_REGISTRY>/contrail-analytics-collector:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-analytics-collector:latest
             - name: devicemanager
-              image: <CONTRAIL_REGISTRY>/contrail-controller-config-devicemgr:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-controller-config-devicemgr:latest
               command:
                 - "/bin/sh"
                 - "-c"
                 - "tail -f /dev/null"
             - name: dnsmasq
-              image: <CONTRAIL_REGISTRY>/contrail-controller-config-dnsmasq:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-controller-config-dnsmasq:latest
               command:
                 - "/bin/sh"
                 - "-c"
                 - "tail -f /dev/null"
             - name: init
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/python:3.8.2-alpine
+              image: python:3.8.2-alpine
             - name: init2
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/busybox:1.31
+              image: busybox:latest
             - name: redis
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/redis:4.0.2
+              image: redis:4.0.2
             - name: schematransformer
-              image: <CONTRAIL_REGISTRY>/contrail-controller-config-schema:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-controller-config-schema:latest
             - name: servicemonitor
-              image: <CONTRAIL_REGISTRY>/contrail-controller-config-svcmonitor:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-controller-config-svcmonitor:latest
             - name: queryengine
-              image: <CONTRAIL_REGISTRY>/contrail-analytics-query-engine:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-analytics-query-engine:latest
             - name: statusmonitor
-              image: <CONTRAIL_REGISTRY>/contrail-statusmonitor:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-statusmonitor:latest
           logLevel: SYS_DEBUG
           zookeeperInstance: zookeeper1
     controls:
@@ -84,15 +82,15 @@ spec:
           cassandraInstance: cassandra1
           containers:
             - name: control
-              image: <CONTRAIL_REGISTRY>/contrail-controller-control-control:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-controller-control-control:latest
             - name: dns
-              image: <CONTRAIL_REGISTRY>/contrail-controller-control-dns:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-controller-control-dns:latest
             - name: init
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/python:3.8.2-alpine
+              image: python:3.8.2-alpine
             - name: named
-              image: <CONTRAIL_REGISTRY>/contrail-controller-control-named:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-controller-control-named:latest
             - name: statusmonitor
-              image: <CONTRAIL_REGISTRY>/contrail-statusmonitor:<CONTRAIL_VERSION>
+              image: steigenhaus/contrail-statusmonitor:latest
           zookeeperInstance: zookeeper1
     provisionManager:
       metadata:
@@ -105,9 +103,9 @@ spec:
         serviceConfiguration:
           containers:
           - name: init
-            image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/python:3.8.2-alpine
+            image: python:3.8.2-alpine
           - name: provisioner
-            image: <CONTRAIL_REGISTRY>/contrail-operator-provisioner:<CONTRAIL_VERSION>
+            image: steigenhaus/contrail-operator-provisioner:latest
     rabbitmq:
       metadata:
         labels:
@@ -117,9 +115,9 @@ spec:
         serviceConfiguration:
           containers:
           - name: init
-            image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/python:3.8.2-alpine
+            image: python:3.8.2-alpine
           - name: rabbitmq
-            image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/rabbitmq:3.7
+            image: rabbitmq:3.7
     webui:
       metadata:
         labels:
@@ -130,13 +128,13 @@ spec:
           cassandraInstance: cassandra1
           containers:
             - name: init
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/python:3.8.2-alpine
+              image: python:3.8.2-alpine
             - name: redis
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/redis:4.0.2
+              image: redis:4.0.2
             - name: webuijob
-              image: <CONTRAIL_REGISTRY>/contrail-controller-webui-job:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-controller-webui-job:latest
             - name: webuiweb
-              image: <CONTRAIL_REGISTRY>/contrail-controller-webui-web:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-controller-webui-web:latest
     zookeepers:
     - metadata:
         labels:
@@ -152,11 +150,11 @@ spec:
         serviceConfiguration:
           containers:
             - name: init
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/python:3.8.2-alpine
+              image: python:3.8.2-alpine
             - name: conf-init
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/python:3.8.2-alpine
+              image: python:3.8.2-alpine
             - name: zookeeper
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/zookeeper:3.5.5
+              image: zookeeper:3.5.5
     kubemanagers:
     - metadata:
         labels:
@@ -168,11 +166,11 @@ spec:
           zookeeperInstance: zookeeper1
           containers:
             - name: init
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/python:3.8.2-alpine
+              image: python:3.8.2-alpine
             - name: kubemanager
-              image: <CONTRAIL_REGISTRY>/contrail-kubernetes-kube-manager:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-kubernetes-kube-manager:latest
             - name: statusmonitor
-              image: <CONTRAIL_REGISTRY>/contrail-statusmonitor:<CONTRAIL_VERSION>
+              image: steigenhaus/contrail-statusmonitor:latest
           ipFabricForwarding: false
           ipFabricSnat: true
           kubernetesTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
@@ -185,56 +183,52 @@ spec:
         name: vroutermasternodes
       spec:
         commonConfiguration:
-          imagePullSecrets:
-            - contrail-registry
           nodeSelector:
             node-role.kubernetes.io/master: ""
         serviceConfiguration:
           controlInstance: control1
-          contrailStatusImage: <CONTRAIL_REGISTRY>/contrail-status:<CONTRAIL_VERSION>
+          contrailStatusImage: tungstenfabric/contrail-status:latest
           containers:
             - name: init
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/python:3.8.2-alpine
+              image: python:3.8.2-alpine
             - name: nodeinit
-              image: <CONTRAIL_REGISTRY>/contrail-node-init:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-node-init:latest
             - name: vrouteragent
-              image: <CONTRAIL_REGISTRY>/contrail-vrouter-agent:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-vrouter-agent:latest
             - name: vroutercni
-              image: <CONTRAIL_REGISTRY>/contrail-kubernetes-cni-init:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-kubernetes-cni-init:latest
             - name: vrouterkernelbuildinit
-              image: <CONTRAIL_REGISTRY>/contrail-vrouter-kernel-build-init:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-vrouter-kernel-build-init:latest
             - name: vrouterkernelinit
-              image: <CONTRAIL_REGISTRY>/contrail-vrouter-kernel-init:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-vrouter-kernel-init:latest
             - name: multusconfig
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/busybox:1.31
+              image: busybox:1.31
     - metadata:
         labels:
           contrail_cluster: cluster1
         name: vrouterworkernodes
       spec:
         commonConfiguration:
-          imagePullSecrets:
-            - contrail-registry
           nodeSelector:
             node-role.kubernetes.io/worker: ""
         serviceConfiguration:
           controlInstance: control1
-          contrailStatusImage: <CONTRAIL_REGISTRY>/contrail-status:<CONTRAIL_VERSION>
+          contrailStatusImage: tungstenfabric/contrail-status:latest
           containers:
             - name: init
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/python:3.8.2-alpine
+              image: python:3.8.2-alpine
             - name: nodeinit
-              image: <CONTRAIL_REGISTRY>/contrail-node-init:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-node-init:latest
             - name: vrouteragent
-              image: <CONTRAIL_REGISTRY>/contrail-vrouter-agent:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-vrouter-agent:latest
             - name: vroutercni
-              image: <CONTRAIL_REGISTRY>/contrail-kubernetes-cni-init:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-kubernetes-cni-init:latest
             - name: vrouterkernelbuildinit
-              image: <CONTRAIL_REGISTRY>/contrail-vrouter-kernel-build-init:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-vrouter-kernel-build-init:latest
             - name: vrouterkernelinit
-              image: <CONTRAIL_REGISTRY>/contrail-vrouter-kernel-init:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-vrouter-kernel-init:latest
             - name: multusconfig
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/busybox:1.31
+              image: busybox:1.31
 
     contrailCNIs:
     - metadata:
@@ -243,34 +237,30 @@ spec:
         name: cnimasternodes
       spec:
         commonConfiguration:
-          imagePullSecrets:
-            - contrail-registry
           nodeSelector:
             node-role.kubernetes.io/master: ""
         serviceConfiguration:
           controlInstance: control1
           containers:
             - name: vroutercni
-              image: <CONTRAIL_REGISTRY>/contrail-kubernetes-cni-init:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-kubernetes-cni-init:latest
             - name: multusconfig
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/busybox:1.31
+              image: busybox:1.31
     - metadata:
         labels:
           contrail_cluster: cluster1
         name: cniworkernodes
       spec:
         commonConfiguration:
-          imagePullSecrets:
-            - contrail-registry
           nodeSelector:
             node-role.kubernetes.io/worker: ""
         serviceConfiguration:
           controlInstance: control1
           containers:
             - name: vroutercni
-              image: <CONTRAIL_REGISTRY>/contrail-kubernetes-cni-init:<CONTRAIL_VERSION>
+              image: tungstenfabric/contrail-kubernetes-cni-init:latest
             - name: multusconfig
-              image: <CONTRAIL_REGISTRY>/common-docker-third-party/contrail/busybox:1.31
+              image: busybox:1.31
     contrailmonitor:
       metadata:
         labels:
