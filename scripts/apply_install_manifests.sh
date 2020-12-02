@@ -1,6 +1,10 @@
 #!/bin/bash
 
-my_file="$(readlink -e "$0")"
+function realpath() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
+my_file=$(realpath "$0")
 my_dir="$(dirname $my_file)"
 DEPLOY_DIR=${DEPLOY_DIR:=$my_dir/../deploy}
 
