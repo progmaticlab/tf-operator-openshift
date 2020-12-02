@@ -12,13 +12,6 @@ fi
 install_dir=$1
 
 cp $DEPLOY_DIR/manifests/* $install_dir/manifests
+cp $DEPLOY_DIR/openshift/* $install_dir/openshift
 
-curl https://raw.githubusercontent.com/Juniper/contrail-operator/R2011/deploy/openshift/openshift/99_master-iptables-machine-config.yaml -o openshift/99_master-iptables-machine-config.yaml
-curl https://raw.githubusercontent.com/Juniper/contrail-operator/R2011/deploy/openshift/openshift/99_master-kernel-modules-overlay.yaml -o openshift/99_master-kernel-modules-overlay.yaml
-curl https://raw.githubusercontent.com/Juniper/contrail-operator/R2011/deploy/openshift/openshift/99_master_network_functions.yaml -o openshift/99_master_network_functions.yaml
-curl https://raw.githubusercontent.com/Juniper/contrail-operator/R2011/deploy/openshift/openshift/99_master_network_manager_stop_service.yaml -o openshift/99_master_network_manager_stop_service.yaml
-curl https://raw.githubusercontent.com/Juniper/contrail-operator/R2011/deploy/openshift/openshift/99_master-pv-mounts.yaml -o openshift/99_master-pv-mounts.yaml
-curl https://raw.githubusercontent.com/Juniper/contrail-operator/R2011/deploy/openshift/openshift/99_worker-iptables-machine-config.yaml -o openshift/99_worker-iptables-machine-config.yaml
-curl https://raw.githubusercontent.com/Juniper/contrail-operator/R2011/deploy/openshift/openshift/99_worker-kernel-modules-overlay.yaml -o openshift/99_worker-kernel-modules-overlay.yaml
-curl https://raw.githubusercontent.com/Juniper/contrail-operator/R2011/deploy/openshift/openshift/99_worker_network_functions.yaml -o openshift/99_worker_network_functions.yaml
-curl https://raw.githubusercontent.com/Juniper/contrail-operator/R2011/deploy/openshift/openshift/99_worker_network_manager_stop_service.yaml -o openshift/99_worker_network_manager_stop_service.yaml
+
