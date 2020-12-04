@@ -16,6 +16,6 @@ fi
 install_dir=$1
 
 cp $DEPLOY_DIR/manifests/* $install_dir/manifests
-cp $DEPLOY_DIR/openshift/* $install_dir/openshift
+#cp $DEPLOY_DIR/openshift/* $install_dir/openshift
 
 

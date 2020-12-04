@@ -35,7 +35,7 @@ spec:
       containers:
         - name: contrail-operator
           # Replace this with the built image name
-          image: steigenhaus/contrail-operator:latest
+          image: steigenhaus/tf-operator:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE
