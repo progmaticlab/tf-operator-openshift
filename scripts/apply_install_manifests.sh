@@ -20,4 +20,4 @@ cp $DEPLOY_DIR/manifests/* $install_dir/manifests
 
 cp $DEPLOY_DIR/openshift/99_master-iptables-machine-config.yaml $install_dir/openshift
 cp $DEPLOY_DIR/openshift/99_master-pv-mounts.yaml $install_dir/openshift
-
+cp $DEPLOY_DIR/openshift/99_master-kernel-modules-overlay.yaml $install_dir/openshift
