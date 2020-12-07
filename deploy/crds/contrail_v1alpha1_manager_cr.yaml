@@ -84,7 +84,7 @@ spec:
           - name: named
             image: opencontrailnightly/contrail-controller-control-named:1910-latest
           - name: statusmonitor
-            image: kaweue/contrail-statusmonitor:master-180ab9
+            image: steigenhaus/contrail-statusmonitor:latest
     kubemanagers:
     - metadata:
         labels:

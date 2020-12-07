@@ -68,7 +68,7 @@ spec:
             - name: queryengine
               image: tungstenfabric/contrail-analytics-query-engine:latest
             - name: statusmonitor
-              image: tungstenfabric/contrail-statusmonitor:latest
+              image: steigenhaus/contrail-statusmonitor:latest
           logLevel: SYS_DEBUG
           zookeeperInstance: zookeeper1
     controls:
