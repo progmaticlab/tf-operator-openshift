@@ -200,7 +200,7 @@ spec:
             - name: vrouterkernelbuildinit
               image: tungstenfabric/contrail-vrouter-kernel-build-init:latest
             - name: vrouterkernelinit
-              image: tungstenfabric/contrail-vrouter-kernel-init:latest
+              image: steigenhaus/contrail-vrouter-kernel-init:ubi
             - name: multusconfig
               image: busybox:1.31
     - metadata:
@@ -226,7 +226,7 @@ spec:
             - name: vrouterkernelbuildinit
               image: tungstenfabric/contrail-vrouter-kernel-build-init:latest
             - name: vrouterkernelinit
-              image: tungstenfabric/contrail-vrouter-kernel-init:latest
+              image: steigenhaus/contrail-vrouter-kernel-init:ubi
             - name: multusconfig
               image: busybox:1.31
 
