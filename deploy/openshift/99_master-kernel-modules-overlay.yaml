@@ -21,4 +21,4 @@ spec:
           path: "/etc/fstab"
           mode: 0644
           contents:
-            source: "data:,overlay%20/lib/modules%20overlay%20lowerdir=/lib/modules,upperdir=/opt/modules,workdir=/opt/modules.wd%200%200"
+            source: "data:,overlay%20/lib/modules%20overlay%20lowerdir=/lib/modules,upperdir=/opt/modules,workdir=/opt/modules.wd,nofail%200%200"
