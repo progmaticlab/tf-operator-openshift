@@ -174,8 +174,12 @@ spec:
           ipFabricForwarding: false
           ipFabricSnat: true
           kubernetesTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-          useKubeadmConfig: true
           hostNetworkService: true
+          KubernetesClusterName: "test1"
+          PodSubnets: "10.128.0.0/14"
+          ServiceSubnets: "172.30.0.0/16"
+          KubernetesAPIServer: "api.test1.openshift.hobgoblin.org"
+          KubernetesAPISSLPort: 6443
     vrouters:
     - metadata:
         labels:
