@@ -180,6 +180,7 @@ spec:
           ServiceSubnets: "172.30.0.0/16"
           KubernetesAPIServer: "api.test1.openshift.hobgoblin.org"
           KubernetesAPISSLPort: 6443
+          useKubeadmConfig: false
     vrouters:
     - metadata:
         labels:
