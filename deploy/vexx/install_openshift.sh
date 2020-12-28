@@ -8,6 +8,7 @@ OPENSHIFT_API_FIP=${OPENSHIFT_API_FIP:-"38.108.68.93"}
 OPENSHIFT_INGRESS_FIP=${OPENSHIFT_INGRESS_FIP:-"38.108.68.166"}
 OPENSHIFT_INSTALL_PATH=${OPENSHIFT_INSTALL_PATH:-"openshift-install"}
 OPENSHIFT_INSTALL_DIR=${OPENSHIFT_INSTALL_DIR:-"os-install-config"}
+OS_IMAGE_PUBLIC_SERVICE=${OS_IMAGE_PUBLIC_SERVICE:="https://image.public.sjc1.vexxhost.net/"}
 OS_CLOUD=${OS_CLOUD:-"vexx"}
 
 sudo yum install -y python3 epel-release
@@ -138,6 +139,7 @@ with open('${OPENSHIFT_INSTALL_DIR}/bootstrap.ign', 'w') as f:
 EOF
 
 python3 ${OPENSHIFT_INSTALL_DIR}/setup_bootsrap_ign.py
-openstack image create --disk-format=raw --container-format=bare --file bootstrap.ign bootstrap-ignition-image
-openstack image show bootstrap-ignition-image
+openstack image create --disk-format=raw --container-format=bare --file ${OPENSHIFT_INSTALL_DIR}/bootstrap.ign bootstrap-ignition-image
+uri=$(openstack image show bootstrap-ignition-image | grep -oh "/v2/images/.*/file")
+storage_url=${OS_IMAGE_PUBLIC_SERVICE}${uri}
 
