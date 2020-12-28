@@ -9,27 +9,21 @@ Deploy will automatically create bootstrap node, 3 master nodes and 3 worker nod
 
 1.   Setup you clouds.yaml file as instucted here: https://docs.openstack.org/python-openstackclient/pike/configuration/index.html . Set your openstack cloud using OS_CLOUD env variable
 
-2. Setup required software:
-
-```bash
-sudo yum install -y python3 epel-release jq
-python3 install openstack-client ansible
-```
-3. Crete two IP addresses inside your OpenStack cloud
+2. Crete two IP addresses inside your OpenStack cloud
 
 ```bash
 openstack floating ip create --description "API <cluster_name>.<base_domain>" <external network>
 openstack floating ip create --description "Ingress <cluster_name>.<base_domain>" <external network>
 ```
 
-4. Add DNS Records to your base domain
+3. Add DNS Records to your base domain
 
 ```
 api.<cluster_name>.<base_domain>.  IN  A  <API_FIP>
 *.apps.<cluster_name>.<base_domain>. IN  A <apps_FIP>
 ```
 
-5. Set up required env variables:
+4. Set up required env variables:
 
 - OPENSHIFT_PUB_KEY - Public keys to be uploaded on openshift machines for user 'core'
 - OPENSHIFT_PULL_SECRET - Pull secret for download openshift images https://cloud.redhat.com/openshift/install/pull-secret.
@@ -38,7 +32,7 @@ api.<cluster_name>.<base_domain>.  IN  A  <API_FIP>
 - OPENSHIFT_API_FIP - Floating IP address for your openshift API
 - OPENSHIFT_INGRESS_FIP - Floating IP address for your openshift Ingress
 
-6. Run install script:
+5. Run install script:
 
 ```bash
 ./install_openshift.sh

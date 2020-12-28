@@ -10,6 +10,9 @@ OPENSHIFT_INSTALL_PATH=${OPENSHIFT_INSTALL_PATH:-"openshift-install"}
 OPENSHIFT_INSTALL_DIR=${OPENSHIFT_INSTALL_DIR:-"os-install-config"}
 OS_CLOUD=${OS_CLOUD:-"vexx"}
 
+sudo yum install -y python3 epel-release jq
+python3 install openstack-client ansible
+
 mkdir -p ./tmpopenshift
 pushd tmpopenshift
 curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.5.21/openshift-install-linux-4.5.21.tar.gz
