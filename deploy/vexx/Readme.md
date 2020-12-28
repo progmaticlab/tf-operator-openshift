@@ -1,9 +1,11 @@
 # Install ovenshift on vexx infra
 
-Requirements:
+Node for run installation scripts below:
 - CentOS 7
 - 2G RAM
 - 10G Disk Space
+
+Deploy will automatically create bootstrap node, 3 master nodes and 3 worker nodes in vexx cloud.
 
 1.   Setup you clouds.yaml file as instucted here: https://docs.openstack.org/python-openstackclient/pike/configuration/index.html . Set your openstack cloud using OS_CLOUD env variable
 

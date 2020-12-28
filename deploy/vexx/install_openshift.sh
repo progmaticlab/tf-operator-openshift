@@ -8,6 +8,7 @@ OPENSHIFT_API_FIP=${OPENSHIFT_API_FIP:-"38.108.68.93"}
 OPENSHIFT_INGRESS_FIP=${OPENSHIFT_INGRESS_FIP:-"38.108.68.166"}
 OPENSHIFT_INSTALL_PATH=${OPENSHIFT_INSTALL_PATH:-"openshift-install"}
 OPENSHIFT_INSTALL_DIR=${OPENSHIFT_INSTALL_DIR:-"os-install-config"}
+OS_CLOUD=${OS_CLOUD:-"vexx"}
 
 mkdir -p ./tmpopenshift
 pushd tmpopenshift
@@ -61,7 +62,7 @@ networking:
 platform:
   openstack:
     apiVIP: 10.100.0.5
-    cloud: vexx
+    cloud: ${OS_CLOUD}
     computeFlavor: v2-highcpu-16
     externalDNS: null
     externalNetwork: public
@@ -84,3 +85,54 @@ rm -f ${OPENSHIFT_INSTALL_DIR}/openshift/99_openshift-cluster-api_master-machine
 $OPENSHIFT_INSTALL_PATH --dir $OPENSHIFT_INSTALL_DIR  create ignition-configs
 
 export INFRA_ID=$(jq -r .infraID $OPENSHIFT_INSTALL_DIR/metadata.json)
+
+cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/setup_bootsrap_ign.py
+import base64
+import json
+import os
+
+with open('bootstrap.ign', 'r') as f:
+    ignition = json.load(f)
+
+files = ignition['storage'].get('files', [])
+
+infra_id = os.environ.get('INFRA_ID', 'openshift').encode()
+hostname_b64 = base64.standard_b64encode(infra_id + b'-bootstrap\n').decode().strip()
+files.append(
+{
+    'path': '/etc/hostname',
+    'mode': 420,
+    'contents': {
+        'source': 'data:text/plain;charset=utf-8;base64,' + hostname_b64,
+        'verification': {}
+    },
+    'filesystem': 'root',
+})
+
+ca_cert_path = os.environ.get('OS_CACERT', '')
+if ca_cert_path:
+    with open(ca_cert_path, 'r') as f:
+        ca_cert = f.read().encode()
+        ca_cert_b64 = base64.standard_b64encode(ca_cert).decode().strip()
+
+    files.append(
+    {
+        'path': '/opt/openshift/tls/cloud-ca-cert.pem',
+        'mode': 420,
+        'contents': {
+            'source': 'data:text/plain;charset=utf-8;base64,' + ca_cert_b64,
+            'verification': {}
+        },
+        'filesystem': 'root',
+    })
+
+ignition['storage']['files'] = files;
+
+with open('bootstrap.ign', 'w') as f:
+    json.dump(ignition, f)
+EOF
+
+python3 ${OPENSHIFT_INSTALL_DIR}/setup_bootsrap_ign.py
+openstack image create --disk-format=raw --container-format=bare --file bootstrap.ign bootstrap-ignition-image
+openstack image show bootstrap-ignition-image
+
