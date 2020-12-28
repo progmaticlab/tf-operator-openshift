@@ -10,8 +10,9 @@ OPENSHIFT_INSTALL_PATH=${OPENSHIFT_INSTALL_PATH:-"openshift-install"}
 OPENSHIFT_INSTALL_DIR=${OPENSHIFT_INSTALL_DIR:-"os-install-config"}
 OS_CLOUD=${OS_CLOUD:-"vexx"}
 
-sudo yum install -y python3 epel-release jq
-python3 install openstack-client ansible
+sudo yum install -y python3 epel-release
+sudo yum install -y jq
+sudo pip3 install python-openstackclient ansible
 
 mkdir -p ./tmpopenshift
 pushd tmpopenshift
