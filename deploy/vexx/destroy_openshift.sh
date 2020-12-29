@@ -65,5 +65,5 @@ if [[ -f $OPENSHIFT_INSTALL_DIR/security-groups.yaml ]]; then
       state: absent
 
 EOF
-    ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/security-groups.yaml
+    ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/destroy-security-groups.yaml
 fi
