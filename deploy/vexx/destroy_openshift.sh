@@ -14,6 +14,30 @@ if [[ ! -f $OPENSHIFT_INSTALL_DIR/inventory.yaml || ! -f $OPENSHIFT_INSTALL_DIR/
   exit 0
 fi
 
+if [[ -f ${OPENSHIFT_INSTALL_DIR}/control-plane.yaml ]]; then
+    cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/destroy-control-plane.yaml
+- import_playbook: common.yaml
+
+- hosts: all
+  gather_facts: no
+
+  tasks:
+  - name: 'Delete the Control Plane servers'
+    os_server:
+      name: "{{ item.1 }}-{{ item.0 }}"
+      state: absent
+      delete_fip: yes
+    with_indexed_items: "{{ [os_cp_server_name] * os_cp_nodes_number }}"
+
+  - name: 'Delete the Control Plane ports'
+    os_port:
+      name: "{{ item.1 }}-{{ item.0 }}"
+      state: absent
+    with_indexed_items: "{{ [os_port_master] * os_cp_nodes_number }}"
+EOF
+    ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/destroy-control-plane.yaml
+fi
+
 if [[ -f $OPENSHIFT_INSTALL_DIR/bootstrap.yaml ]]; then
     cat <<EOF > destroy_bootstrap.yaml
 - import_playbook: common.yaml
@@ -36,8 +60,7 @@ EOF
 fi
 
 if [[ -f $OPENSHIFT_INSTALL_DIR/network.yaml ]]; then
-
-cat <<EOF > $OPENSHIFT_INSTALL_DIR/destroy_network.yaml
+    cat <<EOF > $OPENSHIFT_INSTALL_DIR/destroy_network.yaml
 - import_playbook: common.yaml
 
 - hosts: all
