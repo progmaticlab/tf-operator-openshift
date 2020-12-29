@@ -56,7 +56,7 @@ if [[ -f $OPENSHIFT_INSTALL_DIR/bootstrap.yaml ]]; then
       name: "{{ os_port_bootstrap }}"
       state: absent
 EOF
-    ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/destroy_bootsrap.yaml
+    ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/destroy_bootstrap.yaml
 fi
 
 if [[ -f $OPENSHIFT_INSTALL_DIR/network.yaml ]]; then
