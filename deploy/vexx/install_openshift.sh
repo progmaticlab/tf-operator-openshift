@@ -183,3 +183,54 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/$INFRA_ID-bootstrap-ignition.json
 }
 EOF
 
+for index in $(seq 0 2); do
+    MASTER_HOSTNAME="$INFRA_ID-master-$index\n"
+    python -c "import base64, json, sys;
+ignition = json.load(sys.stdin);
+files = ignition['storage'].get('files', []);
+files.append({'path': '/etc/hostname', 'mode': 420, 'contents': {'source': 'data:text/plain;charset=utf-8;base64,' + base64.standard_b64encode(b'$MASTER_HOSTNAME').decode().strip(), 'verification': {}}, 'filesystem': 'root'});
+ignition['storage']['files'] = files;
+json.dump(ignition, sys.stdout)" <$OPENSHIFT_INSTALL_DIR/master.ign > "$OPENSHIFT_INSTALL_DIR/$INFRA_ID-master-$index-ignition.json"
+done
+
+cat <<EOF > $OPENSHIFT_INSTALL_DIR/common.yaml
+- hosts: localhost
+  gather_facts: no
+
+  vars_files:
+  - metadata.json
+
+  tasks:
+  - name: 'Compute resource names'
+    set_fact:
+      cluster_id_tag: "openshiftClusterID={{ infraID }}"
+      os_network: "{{ infraID }}-network"
+      os_subnet: "{{ infraID }}-nodes"
+      os_router: "{{ infraID }}-external-router"
+      # Port names
+      os_port_api: "{{ infraID }}-api-port"
+      os_port_ingress: "{{ infraID }}-ingress-port"
+      os_port_bootstrap: "{{ infraID }}-bootstrap-port"
+      os_port_master: "{{ infraID }}-master-port"
+      os_port_worker: "{{ infraID }}-worker-port"
+      # Security groups names
+      os_sg_master: "{{ infraID }}-master"
+      os_sg_worker: "{{ infraID }}-worker"
+      # Server names
+      os_bootstrap_server_name: "{{ infraID }}-bootstrap"
+      os_cp_server_name: "{{ infraID }}-master"
+      os_cp_server_group_name: "{{ infraID }}-master"
+      os_compute_server_name: "{{ infraID }}-worker"
+      # Trunk names
+      os_cp_trunk_name: "{{ infraID }}-master-trunk"
+      os_compute_trunk_name: "{{ infraID }}-worker-trunk"
+      # Subnet pool name
+      subnet_pool: "{{ infraID }}-kuryr-pod-subnetpool"
+      # Service network name
+      os_svc_network: "{{ infraID }}-kuryr-service-network"
+      # Service subnet name
+      os_svc_subnet: "{{ infraID }}-kuryr-service-subnet"
+      # Ignition files
+      os_bootstrap_ignition: "{{ infraID }}-bootstrap-ignition.json"
+EOF
+
