@@ -2,7 +2,7 @@
 
 set -ex
 
-OPENSHIFT_CLUSTER_NAME=${CLUSTER_NAME:-"openstack"}
+OPENSHIFT_CLUSTER_NAME=${CLUSTER_NAME:-"vexx-openshift"}
 OPENSHIFT_BASE_DOMAIN=${OPENSHIFT_BASE_DOMAIN:-"hobgoblin.org"}
 OPENSHIFT_API_FIP=${OPENSHIFT_API_FIP:-"38.108.68.93"}
 OPENSHIFT_INGRESS_FIP=${OPENSHIFT_INGRESS_FIP:-"38.108.68.166"}
@@ -60,7 +60,7 @@ controlPlane:
   replicas: 3
 metadata:
   creationTimestamp: null
-  name: openshift
+  name: ${OPENSHIFT_CLUSTER_NAME}
 networking:
   clusterNetwork:
   - cidr: 10.128.0.0/14
