@@ -39,7 +39,7 @@ EOF
 fi
 
 if [[ -f $OPENSHIFT_INSTALL_DIR/bootstrap.yaml ]]; then
-    cat <<EOF > destroy_bootstrap.yaml
+    cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/destroy_bootstrap.yaml
 - import_playbook: common.yaml
 - hosts: all
   gather_facts: no
@@ -60,7 +60,7 @@ EOF
 fi
 
 if [[ -f $OPENSHIFT_INSTALL_DIR/network.yaml ]]; then
-    cat <<EOF > $OPENSHIFT_INSTALL_DIR/destroy_network.yaml
+    cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/destroy_network.yaml
 - import_playbook: common.yaml
 
 - hosts: all
