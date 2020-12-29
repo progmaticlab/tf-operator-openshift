@@ -14,6 +14,27 @@ if [[ ! -f $OPENSHIFT_INSTALL_DIR/inventory.yaml || ! -f $OPENSHIFT_INSTALL_DIR/
   exit 0
 fi
 
+if [[ -f $OPENSHIFT_INSTALL_DIR/bootstrap.yaml ]]; then
+    cat <<EOF > destroy_bootstrap.yaml
+- import_playbook: common.yaml
+- hosts: all
+  gather_facts: no
+
+  tasks:
+  - name: 'Remove the bootstrap server'
+    os_server:
+      name: "{{ os_bootstrap_server_name }}"
+      state: absent
+      delete_fip: yes
+
+  - name: 'Remove the bootstrap server port'
+    os_port:
+      name: "{{ os_port_bootstrap }}"
+      state: absent
+EOF
+    ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/destroy_bootsrap.yaml
+fi
+
 if [[ -f $OPENSHIFT_INSTALL_DIR/network.yaml ]]; then
 
 cat <<EOF > $OPENSHIFT_INSTALL_DIR/destroy_network.yaml
