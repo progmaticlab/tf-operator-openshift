@@ -17,12 +17,12 @@ sudo pip3 install python-openstackclient ansible
 
 mkdir -p ./tmpopenshift
 pushd tmpopenshift
-if ! $(which openshift-install); then
+if ! command -v openshift-install; then
   curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.5.21/openshift-install-linux-4.5.21.tar.gz
   tar xzf openshift-install-linux-4.5.21.tar.gz
   sudo mv ./openshift-install
 fi
-if ! $(which oc) || ! $(which kubectl); then
+if ! command -v oc || ! command -v kubectl; then
   curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.5.21/openshift-client-linux-4.5.21.tar.gz
   tar xzf openshift-client-linux-4.5.21.tar.gz
   sudo mv ./oc ./kubectl /usr/local/bin
