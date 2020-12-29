@@ -152,7 +152,7 @@ uri=$(openstack image show bootstrap-ignition-image | grep -oh "/v2/images/.*/fi
 storage_url=${OS_IMAGE_PUBLIC_SERVICE}${uri}
 token=$(openstack token issue -c id -f value)
 ca_sert=$(cat ${OPENSHIFT_INSTALL_DIR}/auth/kubeconfig | yq -r '.clusters[0].cluster["certificate-authority-data"]')
-cat <<EOF > OPENSHIFT_INSTALL_DIR/$INFRA_ID-bootstrap-ignition.json
+cat <<EOF > $OPENSHIFT_INSTALL_DIR/$INFRA_ID-bootstrap-ignition.json
 {
   "ignition": {
     "config": {
