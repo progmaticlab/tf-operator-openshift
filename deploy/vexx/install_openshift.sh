@@ -12,7 +12,7 @@ OS_IMAGE_PUBLIC_SERVICE=${OS_IMAGE_PUBLIC_SERVICE:="https://image.public.sjc1.ve
 OS_CLOUD=${OS_CLOUD:-"vexx"}
 
 sudo yum install -y python3 epel-release
-sudo yum install -y jq
+sudo yum install -y jq yq
 sudo pip3 install python-openstackclient ansible
 
 mkdir -p ./tmpopenshift
@@ -150,3 +150,36 @@ fi
 openstack image create --disk-format=raw --container-format=bare --file ${OPENSHIFT_INSTALL_DIR}/bootstrap.ign bootstrap-ignition-image
 uri=$(openstack image show bootstrap-ignition-image | grep -oh "/v2/images/.*/file")
 storage_url=${OS_IMAGE_PUBLIC_SERVICE}${uri}
+token=$(openstack token issue -c id -f value)
+ca_sert=$(cat ${OPENSHIFT_INSTALL_DIR}/auth/kubeconfig | yq -r '.clusters[0].cluster["certificate-authority-data"]')
+cat <<EOF > OPENSHIFT_INSTALL_DIR/$INFRA_ID-bootstrap-ignition.json
+{
+  "ignition": {
+    "config": {
+      "append": [{
+        "source": "${storage_url}",
+        "verification": {},
+        "httpHeaders": [{
+          "name": "X-Auth-Token",
+          "value": "${token}"
+        }]
+      }]
+    },
+    "security": {
+      "tls": {
+        "certificateAuthorities": [{
+          "source": "data:text/plain;charset=utf-8;base64,${ca_sert}",
+          "verification": {}
+        }]
+      }
+    },
+    "timeouts": {},
+    "version": "2.4.0"
+  },
+  "networkd": {},
+  "passwd": {},
+  "storage": {},
+  "systemd": {}
+}
+EOF
+
