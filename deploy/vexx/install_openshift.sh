@@ -829,6 +829,8 @@ cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/control-plane.yaml
       name: "{{ item.1 }}-{{ item.0 }}"
       image: "{{ os_image_rhcos }}"
       flavor: "{{ os_flavor_master }}"
+      volume_size: 25
+      boot_from_volume: True
       auto_ip: no
       # The ignition filename will be concatenated with the Control Plane node
       # name and its 0-indexed serial number.
