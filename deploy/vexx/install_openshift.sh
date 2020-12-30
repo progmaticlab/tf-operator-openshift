@@ -922,7 +922,14 @@ EOF
 
 ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/compute-nodes.yaml
 
-oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
+mkdir -p ~/.kube
+cp ${OPENSHIFT_INSTALL_DIR}/auth/kubeconfig ~/.kube/config
+chmod go-rwx ~/.kube/config
+
+for cert in $(oc get csr | grep Pending | sed 's/|/ /' | awk '{print $1}'); do
+  oc adm certificate approve $cert
+done
+
 openshift-install  --dir ${OPENSHIFT_INSTALL_DIR}  --log-level debug wait-for install-complete
 
 echo "INFO: Openshift Setup Complete"
