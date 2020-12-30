@@ -12,8 +12,8 @@ OS_IMAGE_PUBLIC_SERVICE=${OS_IMAGE_PUBLIC_SERVICE:="https://image.public.sjc1.ve
 OS_CLOUD=${OS_CLOUD:-"vexx"}
 
 sudo yum install -y python3 epel-release
-sudo yum install -y jq yq
-sudo pip3 install python-openstackclient ansible
+sudo yum install -y jq
+sudo pip3 install python-openstackclient ansible yq
 
 mkdir -p ./tmpopenshift
 pushd tmpopenshift
