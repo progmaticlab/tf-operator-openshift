@@ -847,3 +847,80 @@ EOF
 ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/control-plane.yaml
 
 ${OPENSHIFT_INSTALL_PATH} --dir ${OPENSHIFT_INSTALL_DIR} wait-for bootstrap-complete
+
+cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/down-bootstrap.yaml
+- import_playbook: common.yaml
+
+- hosts: all
+  gather_facts: no
+
+  tasks:
+  - name: 'Remove the bootstrap server'
+    os_server:
+      name: "{{ os_bootstrap_server_name }}"
+      state: absent
+      delete_fip: yes
+
+  - name: 'Remove the bootstrap server port'
+    os_port:
+      name: "{{ os_port_bootstrap }}"
+      state: absent
+EOF
+
+ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/down-bootstrap.yaml
+
+cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/compute-nodes.yaml
+- import_playbook: common.yaml
+
+- hosts: all
+  gather_facts: no
+
+  tasks:
+  - name: 'Create the Compute ports'
+    os_port:
+      name: "{{ item.1 }}-{{ item.0 }}"
+      network: "{{ os_network }}"
+      security_groups:
+      - "{{ os_sg_worker }}"
+      allowed_address_pairs:
+      - ip_address: "{{ os_subnet_range | next_nth_usable(7) }}"
+    with_indexed_items: "{{ [os_port_worker] * os_compute_nodes_number }}"
+    register: ports
+
+  - name: 'Set Compute ports tag'
+    command:
+      cmd: "openstack port set --tag {{ cluster_id_tag }} {{ item.1 }}-{{ item.0 }}"
+    with_indexed_items: "{{ [os_port_worker] * os_compute_nodes_number }}"
+
+  - name: 'List the Compute Trunks'
+    command:
+      cmd: "openstack network trunk list"
+    when: os_networking_type == "Kuryr"
+    register: compute_trunks
+
+  - name: 'Create the Compute trunks'
+    command:
+      cmd: "openstack network trunk create --parent-port {{ item.1.id }} {{ os_compute_trunk_name }}-{{ item.0 }}"
+    with_indexed_items: "{{ ports.results }}"
+    when:
+    - os_networking_type == "Kuryr"
+    - "os_compute_trunk_name|string not in compute_trunks.stdout"
+
+  - name: 'Create the Compute servers'
+    os_server:
+      name: "{{ item.1 }}-{{ item.0 }}"
+      image: "{{ os_image_rhcos }}"
+      flavor: "{{ os_flavor_worker }}"
+      volume_size: 25
+      boot_from_volume: True
+      auto_ip: no
+      userdata: "{{ lookup('file', 'worker.ign') | string }}"
+      nics:
+      - port-name: "{{ os_port_worker }}-{{ item.0 }}"
+    with_indexed_items: "{{ [os_compute_server_name] * os_compute_nodes_number }}"
+EOF
+
+ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/compute-nodes.yaml
+
+oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
+openshift-install  --dir ${OPENSHIFT_INSTALL_DIR}  --log-level debug wait-for install-complete
