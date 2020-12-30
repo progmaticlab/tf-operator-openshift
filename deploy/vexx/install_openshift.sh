@@ -926,8 +926,14 @@ mkdir -p ~/.kube
 cp ${OPENSHIFT_INSTALL_DIR}/auth/kubeconfig ~/.kube/config
 chmod go-rwx ~/.kube/config
 
-for cert in $(oc get csr | grep Pending | sed 's/|/ /' | awk '{print $1}'); do
-  oc adm certificate approve $cert
+# We have to approve 6 certs totally
+count=6
+while [[ count -gt 0 ]]; do
+  for cert in $(oc get csr | grep Pending | sed 's/|/ /' | awk '{print $1}'); do
+    oc adm certificate approve $cert
+    count=$((count-1))
+  done
+  sleep 3s
 done
 
 openshift-install  --dir ${OPENSHIFT_INSTALL_DIR}  --log-level debug wait-for install-complete
