@@ -928,7 +928,7 @@ chmod go-rwx ~/.kube/config
 
 # We have to approve 6 certs totally
 count=6
-while [[ count -gt 0 ]]; do
+while [[ $count -gt 0 ]]; do
   for cert in $(oc get csr | grep Pending | sed 's/|/ /' | awk '{print $1}'); do
     oc adm certificate approve $cert
     count=$((count-1))
