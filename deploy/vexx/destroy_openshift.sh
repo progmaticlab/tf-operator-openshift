@@ -15,7 +15,7 @@ if [[ ! -f $OPENSHIFT_INSTALL_DIR/inventory.yaml || ! -f $OPENSHIFT_INSTALL_DIR/
 fi
 
 if [[ -f ${OPENSHIFT_INSTALL_DIR}/compute-nodes.yaml ]]; then
-    cat <<EOF > ${OPENSHIFT_INSTALLDIR}/destroy-compute-nodes.yaml
+    cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/destroy-compute-nodes.yaml
 - import_playbook: common.yaml
 
 - hosts: all
