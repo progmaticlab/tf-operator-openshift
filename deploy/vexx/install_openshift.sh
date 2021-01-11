@@ -67,7 +67,7 @@ networking:
     hostPrefix: 23
   machineNetwork:
   - cidr: 10.100.0.0/24
-  networkType: OpenShiftSDN
+  networkType: Contrail
   serviceNetwork:
   - 172.30.0.0/16
 platform:
@@ -92,6 +92,10 @@ EOF
 $OPENSHIFT_INSTALL_PATH --dir $OPENSHIFT_INSTALL_DIR create manifests
 
 rm -f ${OPENSHIFT_INSTALL_DIR}/openshift/99_openshift-cluster-api_master-machines-*.yaml ${OPENSHIFT_INSTALL_DIR}/openshift/99_openshift-cluster-api_worker-machineset-*.yaml
+
+git clone https://github.com/progmaticlab/tf-operator-openshift.git
+
+./tf-operator-openshift/scripts/apply_install_manifests.sh $OPENSHIFT_INSTALL_DIR
 
 $OPENSHIFT_INSTALL_PATH --dir $OPENSHIFT_INSTALL_DIR  create ignition-configs
 
