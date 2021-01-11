@@ -567,25 +567,12 @@ cat <<EOF >> $OPENSHIFT_INSTALL_DIR/security-groups.yaml
       port_range_min: "{{ item.port_from }}"
       port_range_max: "{{ item.port_to }}"
     with_items:
-      - { port_from: 5995, port_to: 5995, proto: "tcp" }
-      - { port_from: 6379, port_to: 6379, proto: "tcp" }
-      - { port_from: 5920, port_to: 5920, proto: "tcp" }
-      - { port_from: 5921, port_to: 5921, proto: "tcp" }
-      - { port_from: 4369, port_to: 4369, proto: "tcp" }
-      - { port_from: 5673, port_to: 5673, proto: "tcp" }
-      - { port_from: 25672, port_to: 25672, proto: "tcp" }
+      - { port_from: 4000, port_to: 26000, proto: "tcp" }
       - { port_from: 514, port_to: 514, proto: "tcp" }
-      - { port_from: 6343, port_to: 6343, proto: "tcp" }
-      - { port_from: 4739, port_to: 4739, proto: "tcp" }
-      - { port_from: 5269, port_to: 5269, proto: "tcp" }
       - { port_from: 53, port_to: 53, proto: "tcp" }
       - { port_from: 179, port_to: 179, proto: "tcp" }
-      - { port_from: 5672, port_to: 5672, proto: "tcp" }
-      - { port_from: 10250, port_to: 10250, proto: "tcp" }
-      - { port_from: 10256, port_to: 10256, proto: "tcp" }
       - { port_from: 80, port_to: 80, proto: "tcp" }
       - { port_from: 443, port_to: 443, proto: "tcp" }
-      - { port_from: 7000, port_to: 10000, proto: "tcp" }
       - { port_from: 2000, port_to: 3888, proto: "tcp" }
       - { port_from: 8053, port_to: 8053, proto: "udp" }
       - { port_from: 4789, port_to: 4789, proto: "udp" }
@@ -597,25 +584,12 @@ cat <<EOF >> $OPENSHIFT_INSTALL_DIR/security-groups.yaml
       port_range_min: "{{ item.port_from }}"
       port_range_max: "{{ item.port_to }}"
     with_items:
-      - { port_from: 5995, port_to: 5995, proto: "tcp" }
-      - { port_from: 6379, port_to: 6379, proto: "tcp" }
-      - { port_from: 5920, port_to: 5920, proto: "tcp" }
-      - { port_from: 5921, port_to: 5921, proto: "tcp" }
-      - { port_from: 4369, port_to: 4369, proto: "tcp" }
-      - { port_from: 5673, port_to: 5673, proto: "tcp" }
-      - { port_from: 25672, port_to: 25672, proto: "tcp" }
+      - { port_from: 4000, port_to: 26000, proto: "tcp" }
       - { port_from: 514, port_to: 514, proto: "tcp" }
-      - { port_from: 6343, port_to: 6343, proto: "tcp" }
-      - { port_from: 4739, port_to: 4739, proto: "tcp" }
-      - { port_from: 5269, port_to: 5269, proto: "tcp" }
       - { port_from: 53, port_to: 53, proto: "tcp" }
       - { port_from: 179, port_to: 179, proto: "tcp" }
-      - { port_from: 5672, port_to: 5672, proto: "tcp" }
-      - { port_from: 10250, port_to: 10250, proto: "tcp" }
-      - { port_from: 10256, port_to: 10256, proto: "tcp" }
       - { port_from: 80, port_to: 80, proto: "tcp" }
       - { port_from: 443, port_to: 443, proto: "tcp" }
-      - { port_from: 7000, port_to: 10000, proto: "tcp" }
       - { port_from: 2000, port_to: 3888, proto: "tcp" }
       - { port_from: 8053, port_to: 8053, proto: "udp" }
       - { port_from: 4789, port_to: 4789, proto: "udp" }
