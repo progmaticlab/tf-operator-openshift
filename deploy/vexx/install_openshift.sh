@@ -564,8 +564,8 @@ cat <<EOF >> $OPENSHIFT_INSTALL_DIR/security-groups.yaml
       security_group: "{{ os_sg_master }}"
       protocol: "{{ item.proto }}"
       remote_ip_prefix: "{{ os_subnet_range }}"
-      port_range_min: {{ item.port_from }}
-      port_range_max: {{ item.port_to }}
+      port_range_min: "{{ item.port_from }}"
+      port_range_max: "{{ item.port_to }}"
     with_items:
       - { port_from: 5995, port_to: 5995, proto: "tcp" }
       - { port_from: 6379, port_to: 6379, proto: "tcp" }
@@ -594,8 +594,8 @@ cat <<EOF >> $OPENSHIFT_INSTALL_DIR/security-groups.yaml
       security_group: "{{ os_sg_worker }}"
       protocol: "{{ item.proto }}"
       remote_ip_prefix: "{{ os_subnet_range }}"
-      port_range_min: {{ item.port_from }}
-      port_range_max: {{ item.port_to }}
+      port_range_min: "{{ item.port_from }}"
+      port_range_max: "{{ item.port_to }}"
     with_items:
       - { port_from: 5995, port_to: 5995, proto: "tcp" }
       - { port_from: 6379, port_to: 6379, proto: "tcp" }
