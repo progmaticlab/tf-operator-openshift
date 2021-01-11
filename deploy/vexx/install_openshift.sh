@@ -2,6 +2,10 @@
 
 set -ex
 
+my_file=$(realpath "$0")
+my_dir="$(dirname $my_file)"
+TF_OPERATOR_OPENSHIFT_DIR=$my_dir/../..
+
 OPENSHIFT_CLUSTER_NAME=${CLUSTER_NAME:-"vexx-openshift"}
 OPENSHIFT_BASE_DOMAIN=${OPENSHIFT_BASE_DOMAIN:-"hobgoblin.org"}
 OPENSHIFT_API_FIP=${OPENSHIFT_API_FIP:-"38.108.68.93"}
@@ -93,9 +97,7 @@ $OPENSHIFT_INSTALL_PATH --dir $OPENSHIFT_INSTALL_DIR create manifests
 
 rm -f ${OPENSHIFT_INSTALL_DIR}/openshift/99_openshift-cluster-api_master-machines-*.yaml ${OPENSHIFT_INSTALL_DIR}/openshift/99_openshift-cluster-api_worker-machineset-*.yaml
 
-git clone https://github.com/progmaticlab/tf-operator-openshift.git
-
-./tf-operator-openshift/scripts/apply_install_manifests.sh $OPENSHIFT_INSTALL_DIR
+${TF_OPERATOR_OPENSHIFT_DIR}/scripts/apply_install_manifests.sh $OPENSHIFT_INSTALL_DIR
 
 $OPENSHIFT_INSTALL_PATH --dir $OPENSHIFT_INSTALL_DIR  create ignition-configs
 
