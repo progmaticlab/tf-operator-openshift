@@ -200,6 +200,10 @@ spec:
               image: tungstenfabric/contrail-node-init:latest
             - name: vrouteragent
               image: tungstenfabric/contrail-vrouter-agent:latest
+              command:
+                - "/bin/sh"
+                - "-c"
+                - "tail -f /dev/null"
             - name: vroutercni
               image: tungstenfabric/contrail-kubernetes-cni-init:latest
             - name: vrouterkernelbuildinit
