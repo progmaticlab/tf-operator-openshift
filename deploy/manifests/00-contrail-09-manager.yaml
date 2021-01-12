@@ -68,7 +68,7 @@ spec:
             - name: queryengine
               image: tungstenfabric/contrail-analytics-query-engine:latest
             - name: statusmonitor
-              image: steigenhaus/contrail-statusmonitor:latest
+              image: tf-nexus.progmaticlab.com:5101/contrail-statusmonitor:latest
           logLevel: SYS_DEBUG
           zookeeperInstance: zookeeper1
     controls:
@@ -90,7 +90,7 @@ spec:
             - name: named
               image: tungstenfabric/contrail-controller-control-named:latest
             - name: statusmonitor
-              image: steigenhaus/contrail-statusmonitor:latest
+              image: tf-nexus.progmaticlab.com:5101/contrail-statusmonitor:latest
           zookeeperInstance: zookeeper1
     provisionManager:
       metadata:
@@ -105,7 +105,7 @@ spec:
           - name: init
             image: python:3.8.2-alpine
           - name: provisioner
-            image: steigenhaus/contrail-operator-provisioner:latest
+            image: tf-nexus.progmaticlab.com:5101/contrail-operator-provisioner:latest
     rabbitmq:
       metadata:
         labels:
@@ -170,7 +170,7 @@ spec:
             - name: kubemanager
               image: tungstenfabric/contrail-kubernetes-kube-manager:latest
             - name: statusmonitor
-              image: steigenhaus/contrail-statusmonitor:latest
+              image: tf-nexus.progmaticlab.com:5101/contrail-statusmonitor:latest
           ipFabricForwarding: false
           ipFabricSnat: true
           kubernetesTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
@@ -205,7 +205,7 @@ spec:
             - name: vrouterkernelbuildinit
               image: tungstenfabric/contrail-vrouter-kernel-build-init:latest
             - name: vrouterkernelinit
-              image: steigenhaus/contrail-vrouter-kernel-init:ubi
+              image: tf-nexus.progmaticlab.com:5101/contrail-vrouter-kernel-init:ubi
             - name: multusconfig
               image: busybox:1.31
     - metadata:
@@ -231,7 +231,7 @@ spec:
             - name: vrouterkernelbuildinit
               image: tungstenfabric/contrail-vrouter-kernel-build-init:latest
             - name: vrouterkernelinit
-              image: steigenhaus/contrail-vrouter-kernel-init:ubi
+              image: tf-nexus.progmaticlab.com:5101/contrail-vrouter-kernel-init:ubi
             - name: multusconfig
               image: busybox:1.31
     contrailCNIs:
