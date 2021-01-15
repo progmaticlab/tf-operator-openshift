@@ -38,19 +38,19 @@ spec:
           analyticsStatisticsTTL: 2
           containers:
             - name: analyticsapi
-              image: tf-nexus.progmaticlab.com:5102/contrail-analytics-api:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-analytics-api:nightly-ubi7
             - name: api
-              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-api:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-api:nightly-ubi7
             - name: collector
-              image: tf-nexus.progmaticlab.com:5102/contrail-analytics-collector:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-analytics-collector:nightly-ubi7
             - name: devicemanager
-              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-devicemgr:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-devicemgr:nightly-ubi7
               command:
                 - "/bin/sh"
                 - "-c"
                 - "tail -f /dev/null"
             - name: dnsmasq
-              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-dnsmasq:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-dnsmasq:nightly-ubi7
               command:
                 - "/bin/sh"
                 - "-c"
@@ -62,13 +62,13 @@ spec:
             - name: redis
               image: redis:4.0.2
             - name: schematransformer
-              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-schema:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-schema:nightly-ubi7
             - name: servicemonitor
-              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-svcmonitor:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-svcmonitor:nightly-ubi7
             - name: queryengine
-              image: tf-nexus.progmaticlab.com:5102/contrail-analytics-query-engine:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-analytics-query-engine:nightly-ubi7
             - name: statusmonitor
-              image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:nightly-ubi7
           logLevel: SYS_DEBUG
           zookeeperInstance: zookeeper1
     controls:
@@ -82,15 +82,15 @@ spec:
           cassandraInstance: cassandra1
           containers:
             - name: control
-              image: tf-nexus.progmaticlab.com:5102/contrail-controller-control-control:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-control-control:nightly-ubi7
             - name: dns
-              image: tf-nexus.progmaticlab.com:5102/contrail-controller-control-dns:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-control-dns:nightly-ubi7
             - name: init
               image: python:3.8.2-alpine
             - name: named
-              image: tf-nexus.progmaticlab.com:5102/contrail-controller-control-named:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-control-named:nightly-ubi7
             - name: statusmonitor
-              image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:nightly-ubi7
           zookeeperInstance: zookeeper1
     provisionManager:
       metadata:
@@ -105,7 +105,7 @@ spec:
           - name: init
             image: python:3.8.2-alpine
           - name: provisioner
-            image: tf-nexus.progmaticlab.com:5102/contrail-operator-provisioner:latest
+            image: tf-nexus.progmaticlab.com:5102/contrail-operator-provisioner:nightly-ubi7
     rabbitmq:
       metadata:
         labels:
@@ -132,9 +132,9 @@ spec:
             - name: redis
               image: redis:4.0.2
             - name: webuijob
-              image: tf-nexus.progmaticlab.com:5102/contrail-controller-webui-job:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-webui-job:nightly-ubi7
             - name: webuiweb
-              image: tf-nexus.progmaticlab.com:5102/contrail-controller-webui-web:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-webui-web:nightly-ubi7
     zookeepers:
     - metadata:
         labels:
@@ -168,9 +168,9 @@ spec:
             - name: init
               image: python:3.8.2-alpine
             - name: kubemanager
-              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-kube-manager:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-kube-manager:nightly-ubi7
             - name: statusmonitor
-              image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:nightly-ubi7
           ipFabricForwarding: false
           ipFabricSnat: true
           kubernetesTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
@@ -192,22 +192,22 @@ spec:
             node-role.kubernetes.io/master: ""
         serviceConfiguration:
           controlInstance: control1
-          contrailStatusImage: tf-nexus.progmaticlab.com:5102/contrail-status:latest
+          contrailStatusImage: tf-nexus.progmaticlab.com:5102/contrail-status:nightly-ubi7
           containers:
             - name: init
               image: python:3.8.2-alpine
             - name: nodeinit
-              image: tf-nexus.progmaticlab.com:5102/contrail-node-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-node-init:nightly-ubi7
             - name: vrouteragent
-              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-agent:strace
+              image: tf-nexus.progmaticlab.com:5102/tf-nexus.progmaticlab.com:5102:strace
               command:
                 - "/bin/sh"
                 - "-c"
                 - "tail -f /dev/null"
             - name: vroutercni
-              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:nightly-ubi7
             - name: vrouterkernelbuildinit
-              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-build-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-build-init:nightly-ubi7
             - name: vrouterkernelinit
               image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-init:ubi
             - name: multusconfig
@@ -222,20 +222,20 @@ spec:
             node-role.kubernetes.io/worker: ""
         serviceConfiguration:
           controlInstance: control1
-          contrailStatusImage: tf-nexus.progmaticlab.com:5102/contrail-status:latest
+          contrailStatusImage: tf-nexus.progmaticlab.com:5102/contrail-status:nightly-ubi7
           containers:
             - name: init
               image: python:3.8.2-alpine
             - name: nodeinit
-              image: tf-nexus.progmaticlab.com:5102/contrail-node-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-node-init:nightly-ubi7
             - name: vrouteragent
-              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-agent:strace
+              image: tf-nexus.progmaticlab.com:5102/tf-nexus.progmaticlab.com:5102:strace
             - name: vroutercni
-              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:nightly-ubi7
             - name: vrouterkernelbuildinit
-              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-build-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-build-init:nightly-ubi7
             - name: vrouterkernelinit
-              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-init:ubi
+              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-init:nightly-ubi7
             - name: multusconfig
               image: busybox:1.31
     contrailCNIs:
@@ -254,7 +254,7 @@ spec:
           binariesDirectory: "/var/lib/cni/bin"
           containers:
             - name: vroutercni
-              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:nightly-ubi7
               command:
               - "sh"
               - "-c"
@@ -286,7 +286,7 @@ spec:
           controlInstance: control1
           containers:
             - name: vroutercni
-              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:nightly-ubi7
               command:
               - "sh"
               - "-c"
