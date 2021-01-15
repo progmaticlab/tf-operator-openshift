@@ -68,7 +68,7 @@ spec:
             - name: queryengine
               image: tf-nexus.progmaticlab.com:5102/contrail-analytics-query-engine:nightly-ubi7
             - name: statusmonitor
-              image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:nightly-ubi7
+              image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:latest
           logLevel: SYS_DEBUG
           zookeeperInstance: zookeeper1
     controls:
@@ -90,7 +90,7 @@ spec:
             - name: named
               image: tf-nexus.progmaticlab.com:5102/contrail-controller-control-named:nightly-ubi7
             - name: statusmonitor
-              image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:nightly-ubi7
+              image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:latest
           zookeeperInstance: zookeeper1
     provisionManager:
       metadata:
@@ -105,7 +105,7 @@ spec:
           - name: init
             image: python:3.8.2-alpine
           - name: provisioner
-            image: tf-nexus.progmaticlab.com:5102/contrail-operator-provisioner:nightly-ubi7
+            image: tf-nexus.progmaticlab.com:5102/contrail-operator-provisioner:latest
     rabbitmq:
       metadata:
         labels:
@@ -170,7 +170,7 @@ spec:
             - name: kubemanager
               image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-kube-manager:nightly-ubi7
             - name: statusmonitor
-              image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:nightly-ubi7
+              image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:latest
           ipFabricForwarding: false
           ipFabricSnat: true
           kubernetesTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
