@@ -199,7 +199,7 @@ spec:
             - name: nodeinit
               image: tf-nexus.progmaticlab.com:5102/contrail-node-init:nightly-ubi7
             - name: vrouteragent
-              image: tf-nexus.progmaticlab.com:5102/tf-nexus.progmaticlab.com:5102:strace
+              image: tf-nexus.progmaticlab.com:5102/tf-nexus.progmaticlab.com:contrail-vrouter-agent:strace
               command:
                 - "/bin/sh"
                 - "-c"
@@ -229,7 +229,7 @@ spec:
             - name: nodeinit
               image: tf-nexus.progmaticlab.com:5102/contrail-node-init:nightly-ubi7
             - name: vrouteragent
-              image: tf-nexus.progmaticlab.com:5102/tf-nexus.progmaticlab.com:5102:strace
+              image: tf-nexus.progmaticlab.com:5102/tf-nexus.progmaticlab.com:contrail-vrouter-agent:strace
             - name: vroutercni
               image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:nightly-ubi7
             - name: vrouterkernelbuildinit
