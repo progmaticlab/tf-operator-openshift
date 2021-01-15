@@ -207,9 +207,9 @@ spec:
             - name: vroutercni
               image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:nightly-ubi7
             - name: vrouterkernelbuildinit
-              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-build-init:nightly-ubi7
+              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-build-init:latnightly-ubi7est
             - name: vrouterkernelinit
-              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-init:ubi
+              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-init:nightly-ubi7
             - name: multusconfig
               image: busybox:1.31
     - metadata:
