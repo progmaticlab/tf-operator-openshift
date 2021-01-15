@@ -38,19 +38,19 @@ spec:
           analyticsStatisticsTTL: 2
           containers:
             - name: analyticsapi
-              image: tungstenfabric/contrail-analytics-api:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-analytics-api:latest
             - name: api
-              image: tungstenfabric/contrail-controller-config-api:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-api:latest
             - name: collector
-              image: tungstenfabric/contrail-analytics-collector:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-analytics-collector:latest
             - name: devicemanager
-              image: tungstenfabric/contrail-controller-config-devicemgr:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-devicemgr:latest
               command:
                 - "/bin/sh"
                 - "-c"
                 - "tail -f /dev/null"
             - name: dnsmasq
-              image: tungstenfabric/contrail-controller-config-dnsmasq:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-dnsmasq:latest
               command:
                 - "/bin/sh"
                 - "-c"
@@ -62,11 +62,11 @@ spec:
             - name: redis
               image: redis:4.0.2
             - name: schematransformer
-              image: tungstenfabric/contrail-controller-config-schema:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-schema:latest
             - name: servicemonitor
-              image: tungstenfabric/contrail-controller-config-svcmonitor:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-config-svcmonitor:latest
             - name: queryengine
-              image: tungstenfabric/contrail-analytics-query-engine:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-analytics-query-engine:latest
             - name: statusmonitor
               image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:latest
           logLevel: SYS_DEBUG
@@ -82,13 +82,13 @@ spec:
           cassandraInstance: cassandra1
           containers:
             - name: control
-              image: tungstenfabric/contrail-controller-control-control:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-control-control:latest
             - name: dns
-              image: tungstenfabric/contrail-controller-control-dns:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-control-dns:latest
             - name: init
               image: python:3.8.2-alpine
             - name: named
-              image: tungstenfabric/contrail-controller-control-named:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-control-named:latest
             - name: statusmonitor
               image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:latest
           zookeeperInstance: zookeeper1
@@ -132,9 +132,9 @@ spec:
             - name: redis
               image: redis:4.0.2
             - name: webuijob
-              image: tungstenfabric/contrail-controller-webui-job:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-webui-job:latest
             - name: webuiweb
-              image: tungstenfabric/contrail-controller-webui-web:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-controller-webui-web:latest
     zookeepers:
     - metadata:
         labels:
@@ -168,7 +168,7 @@ spec:
             - name: init
               image: python:3.8.2-alpine
             - name: kubemanager
-              image: tungstenfabric/contrail-kubernetes-kube-manager:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-kube-manager:latest
             - name: statusmonitor
               image: tf-nexus.progmaticlab.com:5102/contrail-statusmonitor:latest
           ipFabricForwarding: false
@@ -192,22 +192,22 @@ spec:
             node-role.kubernetes.io/master: ""
         serviceConfiguration:
           controlInstance: control1
-          contrailStatusImage: tungstenfabric/contrail-status:latest
+          contrailStatusImage: tf-nexus.progmaticlab.com:5102/contrail-status:latest
           containers:
             - name: init
               image: python:3.8.2-alpine
             - name: nodeinit
-              image: tungstenfabric/contrail-node-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-node-init:latest
             - name: vrouteragent
-              image: tungstenfabric/contrail-vrouter-agent:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-agent:latest
               command:
                 - "/bin/sh"
                 - "-c"
                 - "tail -f /dev/null"
             - name: vroutercni
-              image: tungstenfabric/contrail-kubernetes-cni-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:latest
             - name: vrouterkernelbuildinit
-              image: tungstenfabric/contrail-vrouter-kernel-build-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-build-init:latest
             - name: vrouterkernelinit
               image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-init:ubi
             - name: multusconfig
@@ -222,18 +222,18 @@ spec:
             node-role.kubernetes.io/worker: ""
         serviceConfiguration:
           controlInstance: control1
-          contrailStatusImage: tungstenfabric/contrail-status:latest
+          contrailStatusImage: tf-nexus.progmaticlab.com:5102/contrail-status:latest
           containers:
             - name: init
               image: python:3.8.2-alpine
             - name: nodeinit
-              image: tungstenfabric/contrail-node-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-node-init:latest
             - name: vrouteragent
-              image: tungstenfabric/contrail-vrouter-agent:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-agent:latest
             - name: vroutercni
-              image: tungstenfabric/contrail-kubernetes-cni-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:latest
             - name: vrouterkernelbuildinit
-              image: tungstenfabric/contrail-vrouter-kernel-build-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-build-init:latest
             - name: vrouterkernelinit
               image: tf-nexus.progmaticlab.com:5102/contrail-vrouter-kernel-init:ubi
             - name: multusconfig
@@ -254,7 +254,7 @@ spec:
           binariesDirectory: "/var/lib/cni/bin"
           containers:
             - name: vroutercni
-              image: tungstenfabric/contrail-kubernetes-cni-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:latest
               command:
               - "sh"
               - "-c"
@@ -286,7 +286,7 @@ spec:
           controlInstance: control1
           containers:
             - name: vroutercni
-              image: tungstenfabric/contrail-kubernetes-cni-init:latest
+              image: tf-nexus.progmaticlab.com:5102/contrail-kubernetes-cni-init:latest
               command:
               - "sh"
               - "-c"
