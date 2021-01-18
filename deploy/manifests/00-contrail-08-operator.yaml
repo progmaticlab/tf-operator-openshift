@@ -35,7 +35,7 @@ spec:
       containers:
         - name: contrail-operator
           # Replace this with the built image name
-          image: steigenhaus/tf-operator:latest
+          image: tf-nexus.progmaticlab.com:5102/tf-operator:no-rabbit-readiness
           imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE
