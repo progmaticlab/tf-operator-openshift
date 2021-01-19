@@ -14,6 +14,8 @@ if [[ ! -f $OPENSHIFT_INSTALL_DIR/inventory.yaml || ! -f $OPENSHIFT_INSTALL_DIR/
   exit 0
 fi
 
+openstack image delete bootstrap-ignition-image-$INFRA_ID || /bin/true
+
 if [[ -f ${OPENSHIFT_INSTALL_DIR}/compute-nodes.yaml ]]; then
     cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/destroy-compute-nodes.yaml
 - import_playbook: common.yaml
@@ -59,6 +61,9 @@ if [[ -f ${OPENSHIFT_INSTALL_DIR}/control-plane.yaml ]]; then
       name: "{{ item.1 }}-{{ item.0 }}"
       state: absent
     with_indexed_items: "{{ [os_port_master] * os_cp_nodes_number }}"
+  - name: 'Create the Control Plane server group'
+    command:
+      cmd: "openstack server group delete {{ os_cp_server_group_name }}"
 EOF
     ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/destroy-control-plane.yaml
 fi
