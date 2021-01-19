@@ -149,12 +149,8 @@ with open('${OPENSHIFT_INSTALL_DIR}/bootstrap.ign', 'w') as f:
     json.dump(ignition, f)
 EOF
 
-python3 ${OPENSHIFT_INSTALL_DIR}/setup_bootsrap_ign.py
-if [[ $(openstack image list | grep 'bootstrap-ignition-image$' | wc -l) -gt 0 ]]; then
-  openstack image delete bootstrap-ignition-image
-fi
 openstack image create --disk-format=raw --container-format=bare --file ${OPENSHIFT_INSTALL_DIR}/bootstrap.ign bootstrap-ignition-image-$INFRA_ID
-uri=$(openstack image show bootstrap-ignition-image | grep -oh "/v2/images/.*/file")
+uri=$(openstack image show bootstrap-ignition-image-$INFRA_ID | grep -oh "/v2/images/.*/file")
 storage_url=${OS_IMAGE_PUBLIC_SERVICE}${uri}
 token=$(openstack token issue -c id -f value)
 ca_sert=$(cat ${OPENSHIFT_INSTALL_DIR}/auth/kubeconfig | yq -r '.clusters[0].cluster["certificate-authority-data"]')
