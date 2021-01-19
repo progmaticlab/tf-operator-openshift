@@ -6,7 +6,7 @@ my_file=$(realpath "$0")
 my_dir="$(dirname $my_file)"
 TF_OPERATOR_OPENSHIFT_DIR=$my_dir/../..
 
-OPENSHIFT_CLUSTER_NAME=${OPENSHIFT_CLUSTER_NAME:-"vexx-openshift"}
+OPENSHIFT_CLUSTER_NAME=${CLUSTER_NAME:-"vexx-openshift"}
 OPENSHIFT_BASE_DOMAIN=${OPENSHIFT_BASE_DOMAIN:-"hobgoblin.org"}
 OPENSHIFT_API_FIP=${OPENSHIFT_API_FIP:-"38.108.68.93"}
 OPENSHIFT_INGRESS_FIP=${OPENSHIFT_INGRESS_FIP:-"38.108.68.166"}
@@ -15,28 +15,21 @@ OPENSHIFT_INSTALL_DIR=${OPENSHIFT_INSTALL_DIR:-"os-install-config"}
 OS_IMAGE_PUBLIC_SERVICE=${OS_IMAGE_PUBLIC_SERVICE:="https://image.public.sjc1.vexxhost.net/"}
 OS_CLOUD=${OS_CLOUD:-"vexx"}
 
-
-type python3 && type jq && type ansible && type openstack || {
-  # first run install packages
-  sudo yum install -y python3 epel-release
-  sudo yum install -y jq
-  pip3 install python-openstackclient ansible yq
-}
-
-mkdir -p ~/.local/bin
-export PATH=$PATH:~/.local/bin
+sudo yum install -y python3 epel-release
+sudo yum install -y jq
+sudo pip3 install python-openstackclient ansible yq
 
 mkdir -p ./tmpopenshift
 pushd tmpopenshift
 if ! command -v openshift-install; then
   curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.5.21/openshift-install-linux-4.5.21.tar.gz
   tar xzf openshift-install-linux-4.5.21.tar.gz
-  mv ./openshift-install ~/.local/bin/
+  sudo mv ./openshift-install /usr/local/bin
 fi
 if ! command -v oc || ! command -v kubectl; then
   curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.5.21/openshift-client-linux-4.5.21.tar.gz
   tar xzf openshift-client-linux-4.5.21.tar.gz
-  mv ./oc ./kubectl ~/.local/bin/
+  sudo mv ./oc ./kubectl /usr/local/bin
 fi
 popd
 rm -rf tmpopenshift
@@ -54,9 +47,6 @@ fi
 rm -rf $OPENSHIFT_INSTALL_DIR
 mkdir -p $OPENSHIFT_INSTALL_DIR
 
-# DNS:
-# ns2.vexxhost.net 162.253.55.139
-# ns1.vexxhost.net 38.108.68.145
 cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/install-config.yaml
 apiVersion: v1
 baseDomain: ${OPENSHIFT_BASE_DOMAIN}
@@ -89,7 +79,7 @@ platform:
     apiVIP: 10.100.0.5
     cloud: ${OS_CLOUD}
     computeFlavor: v2-highcpu-16
-    externalDNS: [ "162.253.55.139", "38.108.68.145" ]
+    externalDNS: null
     externalNetwork: public
     ingressVIP: 10.100.0.7
     lbFloatingIP: ${OPENSHIFT_API_FIP}
@@ -159,17 +149,12 @@ with open('${OPENSHIFT_INSTALL_DIR}/bootstrap.ign', 'w') as f:
     json.dump(ignition, f)
 EOF
 
-image_name="bootstrap-ignition-image-$INFRA_ID"
 python3 ${OPENSHIFT_INSTALL_DIR}/setup_bootsrap_ign.py
-openstack image delete $image_name >/dev/null 2>&1 || true
-
-uri=$(openstack image create --disk-format=raw --container-format=bare \
-  --file ${OPENSHIFT_INSTALL_DIR}/bootstrap.ign -f value -c file $image_name)
-[ -n "$uri" ] || {
-  echo "ERROR: failed to create $image_name"
-  exit 1
-}
-
+if [[ $(openstack image list | grep bootstrap-ignition-image | wc -l) -gt 0 ]]; then
+  openstack image delete bootstrap-ignition-image
+fi
+openstack image create --disk-format=raw --container-format=bare --file ${OPENSHIFT_INSTALL_DIR}/bootstrap.ign bootstrap-ignition-image
+uri=$(openstack image show bootstrap-ignition-image | grep -oh "/v2/images/.*/file")
 storage_url=${OS_IMAGE_PUBLIC_SERVICE}${uri}
 token=$(openstack token issue -c id -f value)
 ca_sert=$(cat ${OPENSHIFT_INSTALL_DIR}/auth/kubeconfig | yq -r '.clusters[0].cluster["certificate-authority-data"]')
@@ -235,8 +220,8 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/common.yaml
       os_port_master: "{{ infraID }}-master-port"
       os_port_worker: "{{ infraID }}-worker-port"
       # Security groups names
-      os_sg_master: "allow_all"
-      os_sg_worker: "allow_all"
+      os_sg_master: "{{ infraID }}-master"
+      os_sg_worker: "{{ infraID }}-worker"
       # Server names
       os_bootstrap_server_name: "{{ infraID }}-bootstrap"
       os_cp_server_name: "{{ infraID }}-master"
@@ -290,6 +275,324 @@ all:
       # Number of provisioned Compute nodes.
       # 3 is the minimum number for a fully-functional cluster.
       os_compute_nodes_number: 3
+EOF
+
+cat <<EOF > $OPENSHIFT_INSTALL_DIR/security-groups.yaml
+# Required Python packages:
+#
+# ansible
+# openstackclient
+# openstacksdk
+
+- import_playbook: common.yaml
+
+- hosts: all
+  gather_facts: no
+
+  tasks:
+  - name: 'Create the master security group'
+    os_security_group:
+      name: "{{ os_sg_master }}"
+
+  - name: 'Set master security group tag'
+    command:
+      cmd: "openstack security group set --tag {{ cluster_id_tag }} {{ os_sg_master }} "
+
+  - name: 'Create the worker security group'
+    os_security_group:
+      name: "{{ os_sg_worker }}"
+
+  - name: 'Set worker security group tag'
+    command:
+      cmd: "openstack security group set --tag {{ cluster_id_tag }} {{ os_sg_worker }} "
+
+  - name: 'Create master-sg rule "ICMP"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: icmp
+
+  - name: 'Create master-sg rule "machine config server"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: tcp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 22623
+      port_range_max: 22623
+
+  - name: 'Create master-sg rule "SSH"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: tcp
+      port_range_min: 22
+      port_range_max: 22
+
+  - name: 'Create master-sg rule "DNS (TCP)"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      protocol: tcp
+      port_range_min: 53
+      port_range_max: 53
+
+  - name: 'Create master-sg rule "DNS (UDP)"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      protocol: udp
+      port_range_min: 53
+      port_range_max: 53
+
+  - name: 'Create master-sg rule "mDNS"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      protocol: udp
+      port_range_min: 5353
+      port_range_max: 5353
+
+  - name: 'Create master-sg rule "OpenShift API"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: tcp
+      port_range_min: 6443
+      port_range_max: 6443
+
+  - name: 'Create master-sg rule "VXLAN"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: udp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 4789
+      port_range_max: 4789
+
+  - name: 'Create master-sg rule "Geneve"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: udp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 6081
+      port_range_max: 6081
+
+  - name: 'Create master-sg rule "ovndb"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: tcp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 6641
+      port_range_max: 6642
+
+  - name: 'Create master-sg rule "master ingress internal (TCP)"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: tcp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 9000
+      port_range_max: 9999
+
+  - name: 'Create master-sg rule "master ingress internal (UDP)"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: udp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 9000
+      port_range_max: 9999
+
+  - name: 'Create master-sg rule "kube scheduler"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: tcp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 10259
+      port_range_max: 10259
+
+  - name: 'Create master-sg rule "kube controller manager"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: tcp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 10257
+      port_range_max: 10257
+
+  - name: 'Create master-sg rule "master ingress kubelet secure"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: tcp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 10250
+      port_range_max: 10250
+
+  - name: 'Create master-sg rule "etcd"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: tcp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 2379
+      port_range_max: 2380
+
+  - name: 'Create master-sg rule "master ingress services (TCP)"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: tcp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 30000
+      port_range_max: 32767
+
+  - name: 'Create master-sg rule "master ingress services (UDP)"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: udp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 30000
+      port_range_max: 32767
+
+  - name: 'Create master-sg rule "VRRP"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: '112'
+      remote_ip_prefix: "{{ os_subnet_range }}"
+
+
+  - name: 'Create worker-sg rule "ICMP"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: icmp
+
+  - name: 'Create worker-sg rule "SSH"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: tcp
+      port_range_min: 22
+      port_range_max: 22
+
+  - name: 'Create worker-sg rule "mDNS"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: udp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 5353
+      port_range_max: 5353
+
+  - name: 'Create worker-sg rule "Ingress HTTP"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: tcp
+      port_range_min: 80
+      port_range_max: 80
+
+  - name: 'Create worker-sg rule "Ingress HTTPS"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: tcp
+      port_range_min: 443
+      port_range_max: 443
+
+  - name: 'Create worker-sg rule "router"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: tcp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 1936
+      port_range_max: 1936
+
+  - name: 'Create worker-sg rule "VXLAN"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: udp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 4789
+      port_range_max: 4789
+
+  - name: 'Create worker-sg rule "Geneve"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: udp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 6081
+      port_range_max: 6081
+
+  - name: 'Create worker-sg rule "worker ingress internal (TCP)"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: tcp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 9000
+      port_range_max: 9999
+
+  - name: 'Create worker-sg rule "worker ingress internal (UDP)"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: udp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 9000
+      port_range_max: 9999
+
+  - name: 'Create worker-sg rule "worker ingress kubelet insecure"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: tcp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 10250
+      port_range_max: 10250
+
+  - name: 'Create worker-sg rule "worker ingress services (TCP)"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: tcp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 30000
+      port_range_max: 32767
+
+  - name: 'Create worker-sg rule "worker ingress services (UDP)"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: udp
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: 30000
+      port_range_max: 32767
+
+  - name: 'Create worker-sg rule "VRRP"'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: '112'
+      remote_ip_prefix: "{{ os_subnet_range }}"
+EOF
+
+# Contrail SG Rules
+cat <<EOF >> $OPENSHIFT_INSTALL_DIR/security-groups.yaml
+  - name: 'Create master-sg Contrail rules'
+    os_security_group_rule:
+      security_group: "{{ os_sg_master }}"
+      protocol: "{{ item.proto }}"
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: "{{ item.port_from }}"
+      port_range_max: "{{ item.port_to }}"
+    with_items:
+      - { port_from: 4000, port_to: 26000, proto: "tcp" }
+      - { port_from: 514, port_to: 514, proto: "tcp" }
+      - { port_from: 53, port_to: 53, proto: "tcp" }
+      - { port_from: 179, port_to: 179, proto: "tcp" }
+      - { port_from: 80, port_to: 80, proto: "tcp" }
+      - { port_from: 443, port_to: 443, proto: "tcp" }
+      - { port_from: 2000, port_to: 3888, proto: "tcp" }
+      - { port_from: 8053, port_to: 8053, proto: "udp" }
+      - { port_from: 4789, port_to: 4789, proto: "udp" }
+  - name: 'Create worker-sg Contrail rules'
+    os_security_group_rule:
+      security_group: "{{ os_sg_worker }}"
+      protocol: "{{ item.proto }}"
+      remote_ip_prefix: "{{ os_subnet_range }}"
+      port_range_min: "{{ item.port_from }}"
+      port_range_max: "{{ item.port_to }}"
+    with_items:
+      - { port_from: 4000, port_to: 26000, proto: "tcp" }
+      - { port_from: 514, port_to: 514, proto: "tcp" }
+      - { port_from: 53, port_to: 53, proto: "tcp" }
+      - { port_from: 179, port_to: 179, proto: "tcp" }
+      - { port_from: 80, port_to: 80, proto: "tcp" }
+      - { port_from: 443, port_to: 443, proto: "tcp" }
+      - { port_from: 2000, port_to: 3888, proto: "tcp" }
+      - { port_from: 8053, port_to: 8053, proto: "udp" }
+      - { port_from: 4789, port_to: 4789, proto: "udp" }
 EOF
 
 cat <<EOF >$OPENSHIFT_INSTALL_DIR/network.yaml
@@ -448,6 +751,7 @@ cat <<EOF >$OPENSHIFT_INSTALL_DIR/network.yaml
       cmd: "openstack floating ip set --port {{ os_port_ingress }} {{ os_ingress_fip }}"
 EOF
 
+ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/security-groups.yaml
 ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/network.yaml
 
 cat <<EOF > $OPENSHIFT_INSTALL_DIR/bootstrap.yaml
