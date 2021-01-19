@@ -89,7 +89,7 @@ platform:
     apiVIP: 10.100.0.5
     cloud: ${OS_CLOUD}
     computeFlavor: v2-highcpu-16
-    externalDNS: [ "162.253.55.139", "38.108.68.145" ]
+    externalDNS: null
     externalNetwork: public
     ingressVIP: 10.100.0.7
     lbFloatingIP: ${OPENSHIFT_API_FIP}
