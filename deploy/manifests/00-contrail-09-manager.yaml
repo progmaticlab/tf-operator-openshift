@@ -178,7 +178,7 @@ spec:
           kubernetesClusterName: "test1"
           podSubnets: "10.128.0.0/14"
           serviceSubnets: "172.30.0.0/16"
-          kubernetesAPIServer: "api.vexx-openshift.openshift.hobgoblin.org"
+          kubernetesAPIServer: "api.vexx-openshift.hobgoblin.org"
           kubernetesAPISSLPort: 6443
           useKubeadmConfig: false
     vrouters:
