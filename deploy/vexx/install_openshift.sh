@@ -755,20 +755,6 @@ cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/control-plane.yaml
       cmd: "openstack port set --tag {{ cluster_id_tag }} {{ item.1 }}-{{ item.0 }}"
     with_indexed_items: "{{ [os_port_master] * os_cp_nodes_number }}"
 
-  - name: 'List the Control Plane Trunks'
-    command:
-      cmd: "openstack network trunk list"
-    when: os_networking_type == "Kuryr"
-    register: control_plane_trunks
-
-  - name: 'Create the Control Plane trunks'
-    command:
-      cmd: "openstack network trunk create --parent-port {{ item.1.id }} {{ os_cp_trunk_name }}-{{ item.0 }}"
-    with_indexed_items: "{{ ports.results }}"
-    when:
-    - os_networking_type == "Kuryr"
-    - "os_cp_trunk_name|string not in control_plane_trunks.stdout"
-
   - name: 'List the Server groups'
     command:
       cmd: "openstack server group list -f json -c ID -c Name"
@@ -862,20 +848,6 @@ cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/compute-nodes.yaml
     command:
       cmd: "openstack port set --tag {{ cluster_id_tag }} {{ item.1 }}-{{ item.0 }}"
     with_indexed_items: "{{ [os_port_worker] * os_compute_nodes_number }}"
-
-  - name: 'List the Compute Trunks'
-    command:
-      cmd: "openstack network trunk list"
-    when: os_networking_type == "Kuryr"
-    register: compute_trunks
-
-  - name: 'Create the Compute trunks'
-    command:
-      cmd: "openstack network trunk create --parent-port {{ item.1.id }} {{ os_compute_trunk_name }}-{{ item.0 }}"
-    with_indexed_items: "{{ ports.results }}"
-    when:
-    - os_networking_type == "Kuryr"
-    - "os_compute_trunk_name|string not in compute_trunks.stdout"
 
   - name: 'Create the Compute servers'
     os_server:
