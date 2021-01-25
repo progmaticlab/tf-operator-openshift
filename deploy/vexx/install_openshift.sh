@@ -76,14 +76,14 @@ networking:
   - 172.30.0.0/16
 platform:
   openstack:
-    apiVIP: 10.100.0.5
+#    apiVIP: 10.100.0.5
     cloud: ${OS_CLOUD}
     computeFlavor: v2-highcpu-16
     externalDNS: null
     externalNetwork: public
-    ingressVIP: 10.100.0.7
+#    ingressVIP: 10.100.0.7
     lbFloatingIP: ${OPENSHIFT_API_FIP}
-    octaviaSupport: "1"
+#    octaviaSupport: "1"
     region: ""
     trunkSupport: "0"
 publish: External
