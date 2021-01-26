@@ -387,6 +387,11 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/bootstrap.yaml
   - debug:
       var: os_port_bootstrap
       verbosity: 4
+
+  - name: "LB Addresses"
+    command:
+      cmd: "openstack port list --network vexx-openshift-xjd5w-network  -c name -f value"
+    register: lb_addresses
 EOF
 # DEBUG LOAD BALANCER
 ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/bootstrap.yaml
