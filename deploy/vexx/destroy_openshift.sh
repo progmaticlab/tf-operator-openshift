@@ -69,7 +69,7 @@ if [[ -f ${OPENSHIFT_INSTALL_DIR}/control-plane.yaml ]]; then
   - name: 'Delete the Control Plane server group'
     command:
       cmd: "openstack server group delete {{ os_cp_server_group_name }}"
-    when: server_group_for_delete.stdout_lines is defined
+    when: server_group_for_delete.stdout_lines | bool
 EOF
     ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/destroy-control-plane.yaml
 fi
