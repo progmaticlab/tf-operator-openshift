@@ -61,9 +61,9 @@ if [[ -f ${OPENSHIFT_INSTALL_DIR}/control-plane.yaml ]]; then
       name: "{{ item.1 }}-{{ item.0 }}"
       state: absent
     with_indexed_items: "{{ [os_port_master] * os_cp_nodes_number }}"
-  - name: 'Create the Control Plane server group'
+  - name: 'Delete the Control Plane server group'
     command:
-      cmd: "openstack server group show {{ os_cp_server_group_name }} || openstack server group delete {{ os_cp_server_group_name }}"
+      cmd: "[[ openstack server group show {{ os_cp_server_group_name }} || openstack server group delete {{ os_cp_server_group_name }} ]]"
 EOF
     ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/destroy-control-plane.yaml
 fi
