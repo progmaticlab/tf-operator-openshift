@@ -391,7 +391,10 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/bootstrap.yaml
   - name: "LB Addresses"
     command:
       cmd: "openstack port list --network vexx-openshift-xjd5w-network  -c name -f value"
-    register: lb_addresses
+    register: lb_addresses_raw
+  - set_fact: "Exrtract addresses"
+      lb_addresses:
+        {{ lb_addresses_raw.stdout_lines | select() | join(' ')}}
 EOF
 # DEBUG LOAD BALANCER
 ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/bootstrap.yaml
