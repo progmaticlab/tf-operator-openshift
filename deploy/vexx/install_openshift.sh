@@ -314,45 +314,6 @@ cat <<EOF >$OPENSHIFT_INSTALL_DIR/network.yaml
       interfaces:
       - "{{ os_subnet }}"
 
- # - name: 'Create the API port'
- #   os_port:
- #     name: "{{ os_port_api }}"
- #     network: "{{ os_network }}"
- #     security_groups:
- #     - "{{ os_sg_master }}"
- #     fixed_ips:
- #     - subnet: "{{ os_subnet }}"
- #       ip_address: "{{ os_subnet_range | next_nth_usable(5) }}"
-
- # - name: 'Set API port tag'
- #   command:
- #     cmd: "openstack port set --tag {{ cluster_id_tag }} {{ os_port_api }}"
-
- # - name: 'Create the Ingress port'
- #   os_port:
- #     name: "{{ os_port_ingress }}"
- #     network: "{{ os_network }}"
- #     security_groups:
- #     - "{{ os_sg_worker }}"
- #     fixed_ips:
- #     - subnet: "{{ os_subnet }}"
- #       ip_address: "{{ os_subnet_range | next_nth_usable(7) }}"
-
- # - name: 'Set the Ingress port tag'
-    command:
-      cmd: "openstack port set --tag {{ cluster_id_tag }} {{ os_port_ingress }}"
-
-  # NOTE: openstack ansible module doesn't allow attaching Floating IPs to
-  # ports, let's use the CLI instead
-#  - name: 'Attach the API floating IP to API port'
-#    command:
-#      cmd: "openstack floating ip set --port {{ os_port_api }} {{ os_api_fip }}"
-
-  # NOTE: openstack ansible module doesn't allow attaching Floating IPs to
-  # ports, let's use the CLI instead
-#  - name: 'Attach the Ingress floating IP to Ingress port'
-#    command:
-#      cmd: "openstack floating ip set --port {{ os_port_ingress }} {{ os_ingress_fip }}"
 EOF
 
 ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/network.yaml
