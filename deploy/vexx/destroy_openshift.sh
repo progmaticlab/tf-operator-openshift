@@ -74,7 +74,7 @@ EOF
     ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/destroy-control-plane.yaml
 fi
 
-if [[ -f $OPENSHIFT_INSTALL_DIR/bootstrap.yaml ]]; then
+if [[ -f $OPENSHIFT_INSTALL_DIR/ports.yaml ]]; then
     cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/destroy_bootstrap.yaml
 - import_playbook: common.yaml
 - hosts: all

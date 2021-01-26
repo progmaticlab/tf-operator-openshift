@@ -318,7 +318,7 @@ EOF
 
 ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/network.yaml
 
-cat <<EOF > $OPENSHIFT_INSTALL_DIR/bootstrap.yaml
+cat <<EOF > $OPENSHIFT_INSTALL_DIR/ports.yaml
 # Required Python packages:
 #
 # ansible
@@ -388,16 +388,9 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/bootstrap.yaml
       var: os_port_bootstrap
       verbosity: 4
 
-  - name: "LB Addresses"
-    command:
-      cmd: "openstack port list --network vexx-openshift-xjd5w-network  -c name -f value"
-    register: lb_addresses_raw
-  - set_fact: "Exrtract addresses"
-      lb_addresses:
-        {{ lb_addresses_raw.stdout_lines | select() | join(' ')}}
 EOF
 # DEBUG LOAD BALANCER
-ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/bootstrap.yaml
+ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/ports.yaml
 
 exit 0
   - name: 'List the Server groups'
