@@ -126,24 +126,3 @@ if [[ -f $OPENSHIFT_INSTALL_DIR/network.yaml ]]; then
 EOF
     ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/destroy_network.yaml
 fi
-
-if [[ -f $OPENSHIFT_INSTALL_DIR/security-groups.yaml ]]; then
-    cat  <<EOF > $OPENSHIFT_INSTALL_DIR/destroy-security-groups.yaml
-- import_playbook: common.yaml
-
-- hosts: all
-  gather_facts: no
-
-  tasks:
-  - name: 'Delete the master security group'
-    os_security_group:
-      name: "{{ os_sg_master }}"
-      state: absent
-  - name: 'Delete the worker security group'
-    os_security_group:
-      name: "{{ os_sg_worker }}"
-      state: absent
-
-EOF
-    ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/destroy-security-groups.yaml
-fi
