@@ -709,8 +709,6 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/bootstrap.yaml
     command:
       cmd: "openstack port set --tag {{ cluster_id_tag }} {{ os_port_bootstrap }}"
 
-  - name
-
  # - name: 'Create the bootstrap server'
  #   os_server:
  #     name: "{{ os_bootstrap_server_name }}"
@@ -746,6 +744,12 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/bootstrap.yaml
     command:
       cmd: "openstack port set --tag {{ cluster_id_tag }} {{ item.1 }}-{{ item.0 }}"
     with_indexed_items: "{{ [os_port_master] * os_cp_nodes_number }}"
+  - debug:
+      var: ports
+      verbosity: 4
+  - debug:
+      var: os_port_bootstrap
+      verbosity: 4
 EOF
 # DEBUG LOAD BALANCER
 exit 0
