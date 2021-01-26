@@ -65,7 +65,7 @@ if [[ -f ${OPENSHIFT_INSTALL_DIR}/control-plane.yaml ]]; then
     command:
       cmd: "openstack server group show -f value -c name  {{ os_cp_server_group_name }}"
     register: server_group_for_delete
-    gnore_errors=True
+    ignore_errors: True
   - name: 'Delete the Control Plane server group'
     command:
       cmd: "openstack server group delete {{ os_cp_server_group_name }}"
