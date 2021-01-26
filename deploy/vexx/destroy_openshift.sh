@@ -91,6 +91,11 @@ if [[ -f $OPENSHIFT_INSTALL_DIR/bootstrap.yaml ]]; then
     os_port:
       name: "{{ os_port_bootstrap }}"
       state: absent
+  - name: 'Delete the Control Plane ports'
+    os_port:
+      name: "{{ item.1 }}-{{ item.0 }}"
+      state: absent
+    with_indexed_items: "{{ [os_port_master] * os_cp_nodes_number }}"
 EOF
     ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/destroy_bootstrap.yaml
 fi
