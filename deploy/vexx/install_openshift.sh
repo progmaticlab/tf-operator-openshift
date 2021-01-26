@@ -389,6 +389,8 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/bootstrap.yaml
       verbosity: 4
 EOF
 # DEBUG LOAD BALANCER
+ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/bootstrap.yaml
+
 exit 0
   - name: 'List the Server groups'
     command:
