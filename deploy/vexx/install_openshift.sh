@@ -314,11 +314,6 @@ cat <<EOF >$OPENSHIFT_INSTALL_DIR/network.yaml
       interfaces:
       - "{{ os_subnet }}"
 
-  - name: 'Set external router tag'
-    command:
-      cmd: "openstack router set --tag {{ cluster_id_tag }} {{ os_router }}"
-    when: os_networking_type == "Kuryr"
-
  # - name: 'Create the API port'
  #   os_port:
  #     name: "{{ os_port_api }}"
