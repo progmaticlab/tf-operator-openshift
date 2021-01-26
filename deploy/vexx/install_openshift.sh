@@ -709,34 +709,26 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/bootstrap.yaml
     command:
       cmd: "openstack port set --tag {{ cluster_id_tag }} {{ os_port_bootstrap }}"
 
-  - name: 'Create the bootstrap server'
-    os_server:
-      name: "{{ os_bootstrap_server_name }}"
-      image: "{{ os_image_rhcos }}"
-      flavor: "{{ os_flavor_master }}"
-      volume_size: 25
-      boot_from_volume: True
-      userdata: "{{ lookup('file', os_bootstrap_ignition) | string }}"
-      auto_ip: no
-      nics:
-      - port-name: "{{ os_port_bootstrap }}"
+  - name
 
-  - name: 'Create the bootstrap floating IP'
-    os_floating_ip:
-      state: present
-      network: "{{ os_external_network }}"
-      server: "{{ os_bootstrap_server_name }}"
-EOF
+ # - name: 'Create the bootstrap server'
+ #   os_server:
+ #     name: "{{ os_bootstrap_server_name }}"
+ #     image: "{{ os_image_rhcos }}"
+ #     flavor: "{{ os_flavor_master }}"
+ #     volume_size: 25
+ #     boot_from_volume: True
+ #     userdata: "{{ lookup('file', os_bootstrap_ignition) | string }}"
+ #     auto_ip: no
+ #     nics:
+ #     - port-name: "{{ os_port_bootstrap }}"
+#
+#  - name: 'Create the bootstrap floating IP'
+#    os_floating_ip:
+#      state: present
+#      network: "{{ os_external_network }}"
+#      server: "{{ os_bootstrap_server_name }}"
 
-ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/bootstrap.yaml
-
-cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/control-plane.yaml
-- import_playbook: common.yaml
-
-- hosts: all
-  gather_facts: no
-
-  tasks:
   - name: 'Create the Control Plane ports'
     os_port:
       name: "{{ item.1 }}-{{ item.0 }}"
@@ -754,7 +746,9 @@ cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/control-plane.yaml
     command:
       cmd: "openstack port set --tag {{ cluster_id_tag }} {{ item.1 }}-{{ item.0 }}"
     with_indexed_items: "{{ [os_port_master] * os_cp_nodes_number }}"
-
+EOF
+# DEBUG LOAD BALANCER
+exit 0
   - name: 'List the Server groups'
     command:
       cmd: "openstack server group list -f json -c ID -c Name"
