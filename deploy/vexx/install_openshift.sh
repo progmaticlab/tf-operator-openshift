@@ -8,7 +8,7 @@ TF_OPERATOR_OPENSHIFT_DIR=$my_dir/../..
 
 OPENSHIFT_CLUSTER_NAME=${CLUSTER_NAME:-"vexx-openshift"}
 OPENSHIFT_BASE_DOMAIN=${OPENSHIFT_BASE_DOMAIN:-"hobgoblin.org"}
-OPENSHIFT_API_FIP=${OPENSHIFT_API_FIP:-"38.108.68.80"}
+OPENSHIFT_API_FIP=${OPENSHIFT_API_FIP:-"38.108.68.139"}
 OPENSHIFT_INGRESS_FIP=${OPENSHIFT_INGRESS_FIP:-"38.108.68.90"}
 OPENSHIFT_INSTALL_PATH=${OPENSHIFT_INSTALL_PATH:-"openshift-install"}
 OPENSHIFT_INSTALL_DIR=${OPENSHIFT_INSTALL_DIR:-"os-install-config"}
@@ -417,7 +417,7 @@ ${mc_backend}
 EOM
 done
 
-cat  <<EOM > user-data.sh
+cat  <<EOM > ${OPENSHIFT_INSTALL_DIR}/user-data.sh
 #!/bin/bash
 
 sudo apt update -y
@@ -448,7 +448,7 @@ sudo systemctl restart nginx
 
 EOM
 
-openstack server create --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data user-data.sh ${INFRA_ID}-api-lb --key itimofeev --boot-from-volume 10
+openstack server create --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data ${OPENSHIFT_INSTALL_DIR}/user-data.sh ${INFRA_ID}-api-lb --key itimofeev --boot-from-volume 10
 openstack server add floating ip ${INFRA_ID}-api-lb ${OPENSHIFT_API_FIP}
 
 exit 0
