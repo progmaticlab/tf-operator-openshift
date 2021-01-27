@@ -41,7 +41,7 @@ EOF
     ansible-playbook -i $OPENSHIFT_INSTALL_DIR/inventory.yaml $OPENSHIFT_INSTALL_DIR/destroy-compute-nodes.yaml
 fi
 
-if [[ -f ${OPENSHIFT_INSTALL_DIR}/control-plane.yaml ]]; then
+if [[ -f ${OPENSHIFT_INSTALL_DIR}/servers.yaml ]]; then
     cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/destroy-control-plane.yaml
 - import_playbook: common.yaml
 

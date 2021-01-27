@@ -347,24 +347,6 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/ports.yaml
     command:
       cmd: "openstack port set --tag {{ cluster_id_tag }} {{ os_port_bootstrap }}"
 
- # - name: 'Create the bootstrap server'
- #   os_server:
- #     name: "{{ os_bootstrap_server_name }}"
- #     image: "{{ os_image_rhcos }}"
- #     flavor: "{{ os_flavor_master }}"
- #     volume_size: 25
- #     boot_from_volume: True
- #     userdata: "{{ lookup('file', os_bootstrap_ignition) | string }}"
- #     auto_ip: no
- #     nics:
- #     - port-name: "{{ os_port_bootstrap }}"
-#
-#  - name: 'Create the bootstrap floating IP'
-#    os_floating_ip:
-#      state: present
-#      network: "{{ os_external_network }}"
-#      server: "{{ os_bootstrap_server_name }}"
-
   - name: 'Create the Control Plane ports'
     os_port:
       name: "{{ item.1 }}-{{ item.0 }}"
@@ -451,7 +433,37 @@ EOM
 openstack server create --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data ${OPENSHIFT_INSTALL_DIR}/user-data.sh ${INFRA_ID}-api-lb --key itimofeev --boot-from-volume 10
 openstack server add floating ip ${INFRA_ID}-api-lb ${OPENSHIFT_API_FIP}
 
-exit 0
+cat <<EOF > $OPENSHIFT_INSTALL_DIR/servers.yaml
+# Required Python packages:
+#
+# ansible
+# openstackclient
+# openstacksdk
+# netaddr
+
+- import_playbook: common.yaml
+
+- hosts: all
+  gather_facts: no
+
+  tasks:
+  - name: 'Create the bootstrap server'
+    os_server:
+      name: "{{ os_bootstrap_server_name }}"
+      image: "{{ os_image_rhcos }}"
+      flavor: "{{ os_flavor_master }}"
+      volume_size: 25
+      boot_from_volume: True
+      userdata: "{{ lookup('file', os_bootstrap_ignition) | string }}"
+      auto_ip: no
+      nics:
+      - port-name: "{{ os_port_bootstrap }}"
+
+  - name: 'Create the bootstrap floating IP'
+    os_floating_ip:
+      state: present
+      network: "{{ os_external_network }}"
+      server: "{{ os_bootstrap_server_name }}"
   - name: 'List the Server groups'
     command:
       cmd: "openstack server group list -f json -c ID -c Name"
@@ -498,7 +510,7 @@ exit 0
     with_indexed_items: "{{ [os_cp_server_name] * os_cp_nodes_number }}"
 EOF
 
-ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/control-plane.yaml
+ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/servers.yaml
 
 ${OPENSHIFT_INSTALL_PATH} --dir ${OPENSHIFT_INSTALL_DIR} wait-for bootstrap-complete
 
