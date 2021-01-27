@@ -219,6 +219,7 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/common.yaml
       os_sg_master: "allow_all"
       os_sg_worker: "allow_all"
       # Server names
+      os_api_lb_server_name: "{{ infraID }}-api-lb"
       os_bootstrap_server_name: "{{ infraID }}-bootstrap"
       os_cp_server_name: "{{ infraID }}-master"
       os_cp_server_group_name: "{{ infraID }}-master"
@@ -389,8 +390,66 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/ports.yaml
       verbosity: 4
 
 EOF
-# DEBUG LOAD BALANCER
+
 ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/ports.yaml
+# SETUP LOAD BALANCER
+declare -a PORT_IPS=()
+for port_name in $(openstack port list -c name -f value | grep ${INFRA_ID}); do
+  PORT_IPS=("${PORT_IPS[@]}" "$(openstack port show -c fixed_ips -f json ${port_name} | jq -r .fixed_ips[0].ip_address)")
+done
+api_port=6443
+machine_config_port=22623
+api_backend=""
+for ip in "${PORT_IPS[@]}"; do
+  echo "iterate over ${ip}"
+  read -r -d '' api_backend <<EOM || true
+${api_backend}
+      server ${ip}:${api_port};
+EOM
+
+done
+mc_backend=""
+for ip in "${PORT_IPS[@]}"; do
+  echo "iterate over ${ip}"
+  read -r -d '' mc_backend <<EOM || true
+${mc_backend}
+      server ${ip}:${machine_config_port};
+EOM
+done
+
+cat  <<EOM > user-data.sh
+#!/bin/bash
+
+sudo apt update -y
+sudo apt install nginx-full -y
+
+cat <<EOF > lb.conf
+stream {
+    server {
+        listen 6443;
+        proxy_pass kube_api_backend;
+    }
+    upstream kube_api_backend {
+${api_backend}
+    }
+
+     server {
+        listen 22623;
+        proxy_pass machineconfig_backend;
+    }
+    upstream machineconfig_backend {
+${mc_backend}
+    }
+}
+EOF
+
+sudo mv lb.conf /etc/nginx/modules-enabled
+sudo systemctl restart nginx
+
+EOM
+
+openstack server create --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data user-data.sh ${INFRA_ID}-api-lb --key itimofeev --boot-from-volume 10
+openstack server add floating ip ${INFRA_ID}-api-lb ${OPENSHIFT_API_FIP}
 
 exit 0
   - name: 'List the Server groups'
