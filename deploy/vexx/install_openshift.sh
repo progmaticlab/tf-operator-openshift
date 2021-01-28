@@ -430,7 +430,7 @@ sudo systemctl restart nginx
 
 EOM
 
-openstack server create --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data ${OPENSHIFT_INSTALL_DIR}/user-data.sh ${INFRA_ID}-api-lb --key itimofeev --boot-from-volume 10
+openstack server create --security-group allow_all --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data ${OPENSHIFT_INSTALL_DIR}/user-data.sh ${INFRA_ID}-api-lb --key itimofeev --boot-from-volume 10
 openstack server add floating ip ${INFRA_ID}-api-lb ${OPENSHIFT_API_FIP}
 
 cat <<EOF > $OPENSHIFT_INSTALL_DIR/servers.yaml
