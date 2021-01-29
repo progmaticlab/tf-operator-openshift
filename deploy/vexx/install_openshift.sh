@@ -455,8 +455,8 @@ sudo systemctl restart nginx
 
 EOM
 
-openstack server create --security-group allow_all --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data ${OPENSHIFT_INSTALL_DIR}/user-data.sh ${INFRA_ID}-ing-lb --key itimofeev --boot-from-volume 10
-openstack server add floating ip ${INFRA_ID}-ing-lb ${OPENSHIFT_INGRESS_FIP}
+openstack server create --security-group allow_all --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data ${OPENSHIFT_INSTALL_DIR}/user-data.sh ${INFRA_ID}-api-lb --key itimofeev --boot-from-volume 10
+openstack server add floating ip ${INFRA_ID}-api-lb ${OPENSHIFT_API_FIP}
 
 cat  <<EOM > ${OPENSHIFT_INSTALL_DIR}/user-data.sh
 #!/bin/bash
@@ -493,8 +493,8 @@ sudo systemctl restart nginx
 
 EOM
 
-openstack server create --security-group allow_all --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data ${OPENSHIFT_INSTALL_DIR}/user-data.sh ${INFRA_ID}-api-lb --key itimofeev --boot-from-volume 10
-openstack server add floating ip ${INFRA_ID}-api-lb ${OPENSHIFT_API_FIP}
+openstack server create --security-group allow_all --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data ${OPENSHIFT_INSTALL_DIR}/user-data.sh ${INFRA_ID}-ing-lb --key itimofeev --boot-from-volume 10
+openstack server add floating ip ${INFRA_ID}-ing-lb ${OPENSHIFT_INGRESS_FIP}
 
 cat <<EOF > $OPENSHIFT_INSTALL_DIR/servers.yaml
 # Required Python packages:
