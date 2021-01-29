@@ -230,6 +230,7 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/common.yaml
       os_sg_worker: "allow_all"
       # Server names
       os_api_lb_server_name: "{{ infraID }}-api-lb"
+      os_ing_lb_server_name: "${INFRA_ID}-ing-lb"
       os_bootstrap_server_name: "{{ infraID }}-bootstrap"
       os_cp_server_name: "{{ infraID }}-master"
       os_cp_server_group_name: "{{ infraID }}-master"
@@ -444,6 +445,44 @@ ${api_backend}
     }
     upstream machineconfig_backend {
 ${mc_backend}
+    }
+}
+EOF
+
+sudo mv lb.conf /etc/nginx/modules-enabled
+sudo systemctl restart nginx
+
+EOM
+
+openstack server create --security-group allow_all --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data ${OPENSHIFT_INSTALL_DIR}/user-data.sh ${INFRA_ID}-ing-lb --key itimofeev --boot-from-volume 10
+openstack server add floating ip ${INFRA_ID}-ing-lb ${OPENSHIFT_INGRESS_FIP}
+
+cat  <<EOM > ${OPENSHIFT_INSTALL_DIR}/user-data.sh
+#!/bin/bash
+
+sudo apt update -y
+sudo apt install nginx-full -y
+
+cat <<EOF > lb.conf
+stream {
+    server {
+        listen 80;
+        proxy_pass ing_http_backend;
+    }
+    upstream ing_http_backend {
+      server 10.100.0.60:80;
+      server 10.100.0.61:80;
+      server 10.100.0.62:80;
+    }
+
+    server {
+        listen 443;
+        proxy_pass ing_https_backend;
+    }
+    upstream ing_https_backend {
+      server 10.100.0.60:443;
+      server 10.100.0.61:443;
+      server 10.100.0.62:443;
     }
 }
 EOF
