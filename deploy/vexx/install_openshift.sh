@@ -360,9 +360,9 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/ports.yaml
       security_groups:
       - "{{ os_sg_master }}"
       allowed_address_pairs:
-      - ip_address: "{{ master_addresses.0 }}"
-      - ip_address: "{{ master_addresses.1 }}"
-      - ip_address: "{{ master_addresses.2 }}"
+      - ip_address: "{{ master_addresses[item.0] }}"
+      - ip_address: "{{ master_addresses[item.0] }}"
+      - ip_address: "{{ master_addresses[item.0] }}"
     with_indexed_items: "{{ [os_port_master] * os_cp_nodes_number }}"
     register: ports
 
