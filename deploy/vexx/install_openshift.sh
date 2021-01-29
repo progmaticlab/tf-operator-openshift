@@ -13,6 +13,7 @@ OPENSHIFT_INGRESS_FIP=${OPENSHIFT_INGRESS_FIP:-"38.108.68.90"}
 OPENSHIFT_INSTALL_PATH=${OPENSHIFT_INSTALL_PATH:-"openshift-install"}
 OPENSHIFT_INSTALL_DIR=${OPENSHIFT_INSTALL_DIR:-"os-install-config"}
 OS_IMAGE_PUBLIC_SERVICE=${OS_IMAGE_PUBLIC_SERVICE:="https://image.public.sjc1.vexxhost.net/"}
+OPENSHIFT_VERSION="4.5.21"
 OS_CLOUD=${OS_CLOUD:-"vexx"}
 
 sudo yum install -y python3 epel-release
@@ -22,13 +23,13 @@ sudo pip3 install python-openstackclient ansible yq
 mkdir -p ./tmpopenshift
 pushd tmpopenshift
 if ! command -v openshift-install; then
-  curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.5.30/openshift-install-linux-4.5.30.tar.gz
-  tar xzf openshift-install-linux-4.5.30.tar.gz
+  curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-install-linux-${OPENSHIFT_VERSION}.tar.gz
+  tar xzf openshift-install-linux-${OPENSHIFT_VERSION}.tar.gz
   sudo mv ./openshift-install /usr/local/bin
 fi
 if ! command -v oc || ! command -v kubectl; then
-  curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.5.30/openshift-client-linux-4.5.30.tar.gz
-  tar xzf openshift-client-linux-4.5.30.tar.gz
+  curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-client-linux-${OPENSHIFT_VERSION}.tar.gz
+  tar xzf openshift-client-linux-${OPENSHIFT_VERSION}.tar.gz
   sudo mv ./oc ./kubectl /usr/local/bin
 fi
 popd
