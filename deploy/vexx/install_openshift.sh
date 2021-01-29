@@ -346,8 +346,8 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/ports.yaml
       network: "{{ os_network }}"
       security_groups:
       - "{{ os_sg_master }}"
-    fixed_ips:
-      - ip_address: "{{ bootstrap_address }}"
+      fixed_ips:
+        - ip_address: "{{ bootstrap_address }}"
 
   - name: 'Set bootstrap port tag'
     command:
