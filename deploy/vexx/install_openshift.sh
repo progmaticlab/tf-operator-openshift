@@ -399,32 +399,8 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/ports.yaml
 EOF
 
 ansible-playbook -vv -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/ports.yaml
-# SETUP LOAD BALANCER
-declare -a PORT_IPS=()
-for port_name in $(openstack port list -c name -f value | grep ${INFRA_ID}); do
-  PORT_IPS=("${PORT_IPS[@]}" "$(openstack port show -c fixed_ips -f json ${port_name} | jq -r .fixed_ips[0].ip_address)")
-done
-api_port=6443
-machine_config_port=22623
-api_backend=""
-for ip in "${PORT_IPS[@]}"; do
-  echo "iterate over ${ip}"
-  read -r -d '' api_backend <<EOM || true
-${api_backend}
-      server ${ip}:${api_port};
-EOM
-
-done
-mc_backend=""
-for ip in "${PORT_IPS[@]}"; do
-  echo "iterate over ${ip}"
-  read -r -d '' mc_backend <<EOM || true
-${mc_backend}
-      server ${ip}:${machine_config_port};
-EOM
-done
-
-cat  <<EOM > ${OPENSHIFT_INSTALL_DIR}/user-data.sh
+# SETUP LOAD BALANCERS
+cat  <<EOM > ${OPENSHIFT_INSTALL_DIR}/user-data-api.sh
 #!/bin/bash
 
 sudo apt update -y
@@ -437,7 +413,10 @@ stream {
         proxy_pass kube_api_backend;
     }
     upstream kube_api_backend {
-${api_backend}
+      server 10.100.0.50:6443;
+      server 10.100.0.51:6443;
+      server 10.100.0.52:6443;
+      server 10.100.0.53:6443;
     }
 
      server {
@@ -445,7 +424,10 @@ ${api_backend}
         proxy_pass machineconfig_backend;
     }
     upstream machineconfig_backend {
-${mc_backend}
+      server 10.100.0.50:22623;
+      server 10.100.0.51:22623;
+      server 10.100.0.52:22623;
+      server 10.100.0.53:22623;
     }
 }
 EOF
@@ -455,10 +437,10 @@ sudo systemctl restart nginx
 
 EOM
 
-openstack server create --security-group allow_all --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data ${OPENSHIFT_INSTALL_DIR}/user-data.sh ${INFRA_ID}-api-lb --key itimofeev --boot-from-volume 10
+openstack server create --security-group allow_all --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data ${OPENSHIFT_INSTALL_DIR}/user-data-api.sh ${INFRA_ID}-api-lb --key itimofeev --boot-from-volume 10
 openstack server add floating ip ${INFRA_ID}-api-lb ${OPENSHIFT_API_FIP}
 
-cat  <<EOM > ${OPENSHIFT_INSTALL_DIR}/user-data.sh
+cat  <<EOM > ${OPENSHIFT_INSTALL_DIR}/user-data-ing.sh
 #!/bin/bash
 
 sudo apt update -y
@@ -493,7 +475,7 @@ sudo systemctl restart nginx
 
 EOM
 
-openstack server create --security-group allow_all --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data ${OPENSHIFT_INSTALL_DIR}/user-data.sh ${INFRA_ID}-ing-lb --key itimofeev --boot-from-volume 10
+openstack server create --security-group allow_all --network ${INFRA_ID}-network --image 338b5153-a173-4d35-abfd-c0aa9eaec1d7 --flavor v2-highcpu-2  --user-data ${OPENSHIFT_INSTALL_DIR}/user-data-ing.sh ${INFRA_ID}-ing-lb --key itimofeev --boot-from-volume 10
 openstack server add floating ip ${INFRA_ID}-ing-lb ${OPENSHIFT_INGRESS_FIP}
 
 cat <<EOF > $OPENSHIFT_INSTALL_DIR/servers.yaml
