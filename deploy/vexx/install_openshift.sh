@@ -212,11 +212,11 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/common.yaml
       os_router: "{{ infraID }}-external-router"
       # Port names
       master_addresses:
-      - "10.100.0.13"
-      - "10.100.0.15"
-      - "10.100.0.17"
+      - "10.100.0.50"
+      - "10.100.0.51"
+      - "10.100.0.52"
       bootstrap_address:
-      - "10.100.0.19"
+      - "10.100.0.53"
       os_port_api: "{{ infraID }}-api-port"
       os_port_ingress: "{{ infraID }}-ingress-port"
       os_port_bootstrap: "{{ infraID }}-bootstrap-port"
@@ -379,7 +379,7 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/ports.yaml
 
 EOF
 
-ansible-playbook -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/ports.yaml
+ansible-playbook -vv -i ${OPENSHIFT_INSTALL_DIR}/inventory.yaml ${OPENSHIFT_INSTALL_DIR}/ports.yaml
 # SETUP LOAD BALANCER
 declare -a PORT_IPS=()
 for port_name in $(openstack port list -c name -f value | grep ${INFRA_ID}); do
