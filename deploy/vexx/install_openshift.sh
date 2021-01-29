@@ -215,6 +215,10 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/common.yaml
       - "10.100.0.50"
       - "10.100.0.51"
       - "10.100.0.52"
+      worker_addresses:
+      - "10.100.0.60"
+      - "10.100.0.61"
+      - "10.100.0.62"
       bootstrap_address: "10.100.0.53"
       os_port_api: "{{ infraID }}-api-port"
       os_port_ingress: "{{ infraID }}-ingress-port"
@@ -373,6 +377,22 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/ports.yaml
   - debug:
       var: os_port_bootstrap
       verbosity: 4
+
+  - name: 'Create the Compute ports'
+    os_port:
+      name: "{{ item.1 }}-{{ item.0 }}"
+      network: "{{ os_network }}"
+      security_groups:
+      - "{{ os_sg_worker }}"
+      fixed_ips:
+      - ip_address: "{{ worker_addresses[item.0] }}"
+    with_indexed_items: "{{ [os_port_worker] * os_compute_nodes_number }}"
+    register: ports
+
+  - name: 'Set Compute ports tag'
+    command:
+      cmd: "openstack port set --tag {{ cluster_id_tag }} {{ item.1 }}-{{ item.0 }}"
+    with_indexed_items: "{{ [os_port_worker] * os_compute_nodes_number }}"
 
 EOF
 
@@ -543,23 +563,6 @@ cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/compute-nodes.yaml
 
 - hosts: all
   gather_facts: no
-
-  tasks:
-  - name: 'Create the Compute ports'
-    os_port:
-      name: "{{ item.1 }}-{{ item.0 }}"
-      network: "{{ os_network }}"
-      security_groups:
-      - "{{ os_sg_worker }}"
-      allowed_address_pairs:
-      - ip_address: "{{ os_subnet_range | next_nth_usable(7) }}"
-    with_indexed_items: "{{ [os_port_worker] * os_compute_nodes_number }}"
-    register: ports
-
-  - name: 'Set Compute ports tag'
-    command:
-      cmd: "openstack port set --tag {{ cluster_id_tag }} {{ item.1 }}-{{ item.0 }}"
-    with_indexed_items: "{{ [os_port_worker] * os_compute_nodes_number }}"
 
   - name: 'Create the Compute servers'
     os_server:
