@@ -69,8 +69,8 @@ networking:
   clusterNetwork:
   - cidr: 10.128.0.0/14
     hostPrefix: 23
-  machineNetwork:
-  - cidr: 10.100.0.0/24
+  #machineNetwork:
+  #- cidr: 10.100.0.0/24
   networkType: Contrail
   serviceNetwork:
   - 172.30.0.0/16
@@ -211,6 +211,12 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/common.yaml
       os_subnet: "{{ infraID }}-nodes"
       os_router: "{{ infraID }}-external-router"
       # Port names
+      master_addresses:
+      - "10.100.0.13"
+      - "10.100.0.15"
+      - "10.100.0.17"
+      bootstrap_address:
+      - "10.100.0.19"
       os_port_api: "{{ infraID }}-api-port"
       os_port_ingress: "{{ infraID }}-ingress-port"
       os_port_bootstrap: "{{ infraID }}-bootstrap-port"
@@ -341,8 +347,7 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/ports.yaml
       security_groups:
       - "{{ os_sg_master }}"
       allowed_address_pairs:
-      - ip_address: "{{ os_subnet_range | next_nth_usable(5) }}"
-      - ip_address: "{{ os_subnet_range | next_nth_usable(6) }}"
+      - ip_address: "{{ bootstrap_address }}"
 
   - name: 'Set bootstrap port tag'
     command:
@@ -355,9 +360,9 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/ports.yaml
       security_groups:
       - "{{ os_sg_master }}"
       allowed_address_pairs:
-      - ip_address: "{{ os_subnet_range | next_nth_usable(5) }}"
-      - ip_address: "{{ os_subnet_range | next_nth_usable(6) }}"
-      - ip_address: "{{ os_subnet_range | next_nth_usable(7) }}"
+      - ip_address: "{{ master_addresses.0 }}"
+      - ip_address: "{{ master_addresses.1 }}"
+      - ip_address: "{{ master_addresses.2 }}"
     with_indexed_items: "{{ [os_port_master] * os_cp_nodes_number }}"
     register: ports
 
