@@ -215,8 +215,7 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/common.yaml
       - "10.100.0.50"
       - "10.100.0.51"
       - "10.100.0.52"
-      bootstrap_address:
-      - "10.100.0.53"
+      bootstrap_address: "10.100.0.53"
       os_port_api: "{{ infraID }}-api-port"
       os_port_ingress: "{{ infraID }}-ingress-port"
       os_port_bootstrap: "{{ infraID }}-bootstrap-port"
