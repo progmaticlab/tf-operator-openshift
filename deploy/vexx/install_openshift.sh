@@ -55,13 +55,11 @@ compute:
 - architecture: amd64
   hyperthreading: Enabled
   name: worker
-  platform: {}
   replicas: 0
 controlPlane:
   architecture: amd64
   hyperthreading: Enabled
   name: master
-  platform: {}
   replicas: 3
 metadata:
   creationTimestamp: null
@@ -70,25 +68,12 @@ networking:
   clusterNetwork:
   - cidr: 10.128.0.0/14
     hostPrefix: 23
-  #machineNetwork:
-  #- cidr: 10.100.0.0/24
   networkType: Contrail
   serviceNetwork:
   - 172.30.0.0/16
 platform:
   none: {}
-#  openstack:
-#    apiVIP: 10.100.0.5
-#    cloud: ${OS_CLOUD}
-#    computeFlavor: v2-highcpu-16
-#    externalDNS: null
-#    externalNetwork: public
-#    ingressVIP: 10.100.0.7
-#    lbFloatingIP: ${OPENSHIFT_API_FIP}
-#    octaviaSupport: "1"
-#    region: ""
-#    trunkSupport: "0"
-publish: External
+fips: false
 pullSecret: |
   ${OPENSHIFT_PULL_SECRET}
 sshKey: |
