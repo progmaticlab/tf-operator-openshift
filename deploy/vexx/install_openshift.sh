@@ -570,7 +570,7 @@ cat <<EOF > ${OPENSHIFT_INSTALL_DIR}/compute-nodes.yaml
 
 - hosts: all
   gather_facts: no
-
+  tasks:
   - name: 'Create the Compute servers'
     os_server:
       name: "{{ item.1 }}-{{ item.0 }}"
