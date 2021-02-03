@@ -343,6 +343,10 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/ports.yaml
     command:
       cmd: "openstack port set --tag {{ cluster_id_tag }} {{ os_port_bootstrap }}"
 
+  - name: 'Disable bootstrap port security'
+    command:
+      cmd: "openstack port set --no-security-group --disable-port-security ${os_port_bootstrap}"
+
   - name: 'Create the Control Plane ports'
     os_port:
       name: "{{ item.1 }}-{{ item.0 }}"
@@ -358,12 +362,11 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/ports.yaml
     command:
       cmd: "openstack port set --tag {{ cluster_id_tag }} {{ item.1 }}-{{ item.0 }}"
     with_indexed_items: "{{ [os_port_master] * os_cp_nodes_number }}"
-  - debug:
-      var: ports
-      verbosity: 4
-  - debug:
-      var: os_port_bootstrap
-      verbosity: 4
+
+  - name: 'Disable bootstcontrol plane port security'
+    command:
+      cmd: "openstack port set --no-security-group --disable-port-security {{ item.1 }}-{{ item.0 }}"
+    with_indexed_items: "{{ [os_port_master] * os_cp_nodes_number }}"
 
   - name: 'Create the Compute ports'
     os_port:
@@ -380,6 +383,11 @@ cat <<EOF > $OPENSHIFT_INSTALL_DIR/ports.yaml
     command:
       cmd: "openstack port set --tag {{ cluster_id_tag }} {{ item.1 }}-{{ item.0 }}"
     with_indexed_items: "{{ [os_port_worker] * os_compute_nodes_number }}"
+
+  - name: 'Disable compute port security'
+    command:
+      cmd: "openstack port set --no-security-group --disable-port-security {{ item.1 }}-{{ item.0 }}"
+    with_indexed_items: "{{ [os_port_master] * os_compute_nodes_number}}"
 
 EOF
 
