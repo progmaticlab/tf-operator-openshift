@@ -11,10 +11,6 @@ err() {
     exit 1
 }
 
-[[ "$(whoami)" == "root" ]]  || err "Run this using root user"
-
-yum install -y wget
-
 OCP_VERSION=${OCP_VERSION:-"4.5.21"}
 N_MAST=${N_MAST:-"3"}
 N_WORK=${N_WORK:-"2"}
@@ -29,8 +25,8 @@ LOADBALANCER_MEM=${LOADBALANCER_MEM:-"1024"}
 VIRTUAL_NET=${VIRTUAL_NET:-"default"}
 BASE_DOMAIN=${BASE_DOMAIN:-"hobgoblin.org"}
 CLUSTER_NAME=${CLUSTER_NAME:-"cluster1"}
-INSTALL_DIR=${INSTALL_DIR:-"~/install-${CLUSTER_NAME}"}
-DOWNLOADS_DIR=${DOWNLOADS_DIR:-"~/downloads-${CLUSTER_NAME}"}
+INSTALL_DIR=${INSTALL_DIR:-"${HOME}/install-${CLUSTER_NAME}"}
+DOWNLOADS_DIR=${DOWNLOADS_DIR:-"${HOME}/downloads-${CLUSTER_NAME}"}
 
 
 [[ -z ${PULL_SECRET} ]] || err "ERROR: set PULL_SECRET env variable"
@@ -43,14 +39,17 @@ RHCOS_MIRROR="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos"
 LB_IMG_URL="https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2"
 
 
-# Create install dir, or fail if it is exists
-[[ -d "$INSTALL_DIR"  ]] && err "Installation directory $INSTALL_DIR already in use"
+# Create install dirs, or fail if it is exists
+# [[ -d "$INSTALL_DIR"  ]] && err "Installation directory $INSTALL_DIR already in use"
+[[ -d "$INSTALL_DIR"  ]] && rm -rf ${INSTALL_DIR}
+mkdir -p ${INSTALL_DIR}
+mkdir -p ${DOWNLOADS_DIR}
 
 CLIENT=$(curl -N --fail -qs "${OCP_MIRROR}/${OCP_VERSION}/" | grep  -m1 "client-linux" | sed 's/.*href="\(openshift-.*\)">open.*/\1/')
 CLIENT_URL="${OCP_MIRROR}/${OCP_VERSION}/${CLIENT}"
 
 INSTALLER=$(curl -N --fail -qs "${OCP_MIRROR}/${OCP_VERSION}/" | grep  -m1 "install-linux" | sed 's/.*href="\(openshift-.*\)">open.*/\1/')
-INSTALLER="${OCP_MIRROR}/${OCP_VERSION}/${INSTALLER}"
+INSTALLER_URL="${OCP_MIRROR}/${OCP_VERSION}/${INSTALLER}"
 
 [[ -f ${DOWNLOADS_DIR}/${CLIENT} ]] || wget "$CLIENT_URL" -O "${DOWNLOADS_DIR}/$CLIENT"
 [[ -f ${DOWNLOADS_DIR}/${INSTALLER} ]] || wget "$INSTALLER_URL" -O "${DOWNLOADS_DIR}/$INSTALLER"
