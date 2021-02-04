@@ -14,6 +14,8 @@ err() {
 OCP_VERSION=${OCP_VERSION:-"4.5.21"}
 RHCOS_VERSION=${RHCOS_VERSION:="4.6/4.6.8"}
 RHCOS_IMAGE="rhcos-metal.x86_64.raw.gz"
+RHCOS_KERNEL="rhcos-live-kernel-x86_64"
+RHCOS_INITRAMFS="rhcos-live-initramfs.x86_64.img"
 N_MAST=${N_MAST:-"3"}
 N_WORK=${N_WORK:-"2"}
 MASTER_CPU=${MASTER_CPU:-"4"}
@@ -51,7 +53,7 @@ CLIENT_URL="${OCP_MIRROR}/${OCP_VERSION}/${CLIENT}"
 INSTALLER="openshift-install-linux-${OCP_VERSION}.tar.gz"
 INSTALLER_URL="${OCP_MIRROR}/${OCP_VERSION}/${INSTALLER}"
 
-RHCOS_URL="RHCOS_MIRROR/${RHCOS_VERSION}/${RHCOS_IMAGE}"
+RHCOS_URL="${RHCOS_MIRROR}/${RHCOS_VERSION}/${RHCOS_IMAGE}"
 
 if [[ ! -f ${DOWNLOADS_DIR}/${CLIENT} ]]; then
     wget "$CLIENT_URL" -O "${DOWNLOADS_DIR}/$CLIENT"
@@ -64,9 +66,16 @@ if [[ ! -f ${DOWNLOADS_DIR}/${INSTALLER} ]]; then
     rm -f rm -f README.md
 fi
 if [[ ! -f ${DOWNLOADS_DIR}/${RHCOS_IMAGE} ]]; then
-    wget "$RHCOS_URL" -O "${DOWNLOADS_DIR}/$RHCOS_IMAGE"
+    wget "$RHCOS_URL" -O "${DOWNLOADS_DIR}/${RHCOS_IMAGE}"
+fi
+if [[ ! -f ${DOWNLOADS_DIR}/${RHCOS_KERNEL} ]]; then
+    wget "${RHCOS_MIRROR}/${RHCOS_VERSION}/$RHCOS_KERNEL" -O "${DOWNLOADS_DIR}/$RHCOS_KERNEL"
+fi
+if [[ ! -f ${DOWNLOADS_DIR}/${RHCOS_INITRAMFS} ]]; then
+    wget "${RHCOS_MIRROR}/${RHCOS_VERSION}/$RHCOS_INITRAMFS" -O "${DOWNLOADS_DIR}/$RHCOS_INITRAMFS"
 fi
 if [[ ! -f ${DOWNLOADS_DIR}/${LB_IMAGE} ]]; then
     wget "$LB_IMG_URL" -O "${DOWNLOADS_DIR}/$LB_IMAGE"
 fi
+
 
