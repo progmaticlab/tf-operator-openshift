@@ -123,3 +123,93 @@ sshKey: '${OPENSHIFT_PUB_KEY}'
 EOF
 
 
+./openshift-install create ignition-configs --dir=./${INSTALL_DIR}
+
+WS_PORT="1234"
+cat <<EOF > tmpws.service
+[Unit]
+After=network.target
+[Service]
+Type=simple
+WorkingDirectory=/opt
+ExecStart=/usr/bin/python -m SimpleHTTPServer ${WS_PORT}
+[Install]
+WantedBy=default.target
+EOF
+
+cat <<EOF >haproxy.cfg
+global
+  log 127.0.0.1 local2
+  chroot /var/lib/haproxy
+  pidfile /var/run/haproxy.pid
+  maxconn 4000
+  user haproxy
+  group haproxy
+  daemon
+  stats socket /var/lib/haproxy/stats
+defaults
+  mode tcp
+  log global
+  option tcplog
+  option dontlognull
+  option redispatch
+  retries 3
+  timeout queue 1m
+  timeout connect 10s
+  timeout client 1m
+  timeout server 1m
+  timeout check 10s
+  maxconn 3000
+# 6443 points to control plan
+frontend ${CLUSTER_NAME}-api *:6443
+  default_backend master-api
+backend master-api
+  balance source
+  server bootstrap bootstrap.${CLUSTER_NAME}.${BASE_DOMAIN}:6443 check
+EOF
+
+for i in $(seq 1 ${N_MASTER})
+do
+    echo "  server master-${i} master-${i}.${CLUSTER_NAME}.${BASE_DOMAIN}:6443 check" >> haproxy.cfg
+done
+
+cat <<EOF >>haproxy.cfg
+
+# 22623 points to control plane
+frontend ${CLUSTER_NAME}-mapi *:22623
+  default_backend master-mapi
+backend master-mapi
+  balance source
+  server bootstrap bootstrap.${CLUSTER_NAME}.${BASE_DOMAIN}:22623 check
+EOF
+
+for i in $(seq 1 ${N_MASTER})
+do
+    echo "  server master-${i} master-${i}.${CLUSTER_NAME}.${BASE_DOMAIN}:22623 check" >> haproxy.cfg
+done
+
+cat <<EOF >>haproxy.cfg
+# 80 points to master nodes
+frontend ${CLUSTER_NAME}-http *:80
+  default_backend ingress-http
+backend ingress-http
+  balance source
+EOF
+
+for i in $(seq 1 ${N_MASTER})
+do
+    echo "  server master-${i} master-${i}.${CLUSTER_NAME}.${BASE_DOMAIN}:80 check" >> haproxy.cfg
+done
+
+cat <<EOF >>haproxy.cfg
+# 443 points to master nodes
+frontend ${CLUSTER_NAME}-https *:443
+  default_backend infra-https
+backend infra-https
+  balance source
+EOF
+
+for i in $(seq 1 ${N_MASTER})
+do
+    echo "  server master-${i} master-${i}.${CLUSTER_NAME}.${BASE_DOMAIN}:443 check" >> haproxy.cfg
+done
