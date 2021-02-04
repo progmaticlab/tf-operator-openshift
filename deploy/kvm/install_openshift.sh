@@ -38,20 +38,26 @@ OCP_MIRROR="https://mirror.openshift.com/pub/openshift-v4/clients/ocp"
 RHCOS_MIRROR="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos"
 LB_IMG_URL="https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2"
 
-
-# Create install dirs, or fail if it is exists
-# [[ -d "$INSTALL_DIR"  ]] && err "Installation directory $INSTALL_DIR already in use"
 [[ -d "$INSTALL_DIR"  ]] && rm -rf ${INSTALL_DIR}
 mkdir -p ${INSTALL_DIR}
 mkdir -p ${DOWNLOADS_DIR}
 
-CLIENT=$(curl -N --fail -qs "${OCP_MIRROR}/${OCP_VERSION}/" | grep  -m1 "client-linux" | sed 's/.*href="\(openshift-.*\)">open.*/\1/')
+CLIENT="openshift-client-linux-${OCP_VERSION}.tar.gz"
 CLIENT_URL="${OCP_MIRROR}/${OCP_VERSION}/${CLIENT}"
 
-INSTALLER=$(curl -N --fail -qs "${OCP_MIRROR}/${OCP_VERSION}/" | grep  -m1 "install-linux" | sed 's/.*href="\(openshift-.*\)">open.*/\1/')
+INSTALLER="openshift-install-linux-${OCP_VERSION}.tar.gz"  
 INSTALLER_URL="${OCP_MIRROR}/${OCP_VERSION}/${INSTALLER}"
 
-[[ -f ${DOWNLOADS_DIR}/${CLIENT} ]] || wget "$CLIENT_URL" -O "${DOWNLOADS_DIR}/$CLIENT"
-[[ -f ${DOWNLOADS_DIR}/${INSTALLER} ]] || wget "$INSTALLER_URL" -O "${DOWNLOADS_DIR}/$INSTALLER"
-tar -xf "${DOWNLOADS_DIR}/${CLIENT}" && rm -f README.md
-tar -xf "${DOWNLOADS_DIR}/${INSTALLER}" && rm -f rm -f README.md
+if [[ ! -f ${DOWNLOADS_DIR}/${CLIENT} ]]; then
+    wget "$CLIENT_URL" -O "${DOWNLOADS_DIR}/$CLIENT" 
+    tar -xf "${DOWNLOADS_DIR}/${CLIENT}" 
+    rm -f README.md
+fi
+if [[ ! -f ${DOWNLOADS_DIR}/${INSTALLER} ]]; then
+    wget "$INSTALLER_URL" -O "${DOWNLOADS_DIR}/$INSTALLER"
+    tar -xf "${DOWNLOADS_DIR}/${INSTALLER}"
+    rm -f rm -f README.md
+fi
+
+
+
