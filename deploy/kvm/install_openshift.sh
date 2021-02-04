@@ -12,6 +12,8 @@ err() {
 }
 
 OCP_VERSION=${OCP_VERSION:-"4.5.21"}
+RHCOS_VERSION=${RHCOS_VERSION:="4.6/4.6.8"}
+RHCOS_IMAGE="rhcos-metal.x86_64.raw.gz"
 N_MAST=${N_MAST:-"3"}
 N_WORK=${N_WORK:-"2"}
 MASTER_CPU=${MASTER_CPU:-"4"}
@@ -37,6 +39,7 @@ VM_DIR="/var/lib/libvirt/images"
 OCP_MIRROR="https://mirror.openshift.com/pub/openshift-v4/clients/ocp"
 RHCOS_MIRROR="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos"
 LB_IMG_URL="https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2"
+LB_IMAGE="CentOS-7-x86_64-GenericCloud.qcow2"
 
 [[ -d "$INSTALL_DIR"  ]] && rm -rf ${INSTALL_DIR}
 mkdir -p ${INSTALL_DIR}
@@ -45,12 +48,14 @@ mkdir -p ${DOWNLOADS_DIR}
 CLIENT="openshift-client-linux-${OCP_VERSION}.tar.gz"
 CLIENT_URL="${OCP_MIRROR}/${OCP_VERSION}/${CLIENT}"
 
-INSTALLER="openshift-install-linux-${OCP_VERSION}.tar.gz"  
+INSTALLER="openshift-install-linux-${OCP_VERSION}.tar.gz"
 INSTALLER_URL="${OCP_MIRROR}/${OCP_VERSION}/${INSTALLER}"
 
+RHCOS_URL="RHCOS_MIRROR/${RHCOS_VERSION}/${RHCOS_IMAGE}"
+
 if [[ ! -f ${DOWNLOADS_DIR}/${CLIENT} ]]; then
-    wget "$CLIENT_URL" -O "${DOWNLOADS_DIR}/$CLIENT" 
-    tar -xf "${DOWNLOADS_DIR}/${CLIENT}" 
+    wget "$CLIENT_URL" -O "${DOWNLOADS_DIR}/$CLIENT"
+    tar -xf "${DOWNLOADS_DIR}/${CLIENT}"
     rm -f README.md
 fi
 if [[ ! -f ${DOWNLOADS_DIR}/${INSTALLER} ]]; then
@@ -58,6 +63,10 @@ if [[ ! -f ${DOWNLOADS_DIR}/${INSTALLER} ]]; then
     tar -xf "${DOWNLOADS_DIR}/${INSTALLER}"
     rm -f rm -f README.md
 fi
-
-
+if [[ ! -f ${DOWNLOADS_DIR}/${RHCOS_IMAGE} ]]; then
+    wget "$RHCOS_URL" -O "${DOWNLOADS_DIR}/$RHCOS_IMAGE"
+fi
+if [[ ! -f ${DOWNLOADS_DIR}/${LB_IMAGE} ]]; then
+    wget "$LB_IMG_URL" -O "${DOWNLOADS_DIR}/$LB_IMAGE"
+fi
 
