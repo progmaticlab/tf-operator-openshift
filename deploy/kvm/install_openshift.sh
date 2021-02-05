@@ -242,6 +242,7 @@ sudo virsh net-update ${VIRTUAL_NET} add-last ip-dhcp-host --xml "<host mac='$MA
 echo  "$LBIP lb.${CLUSTER_NAME}.${BASE_DOMAIN}" \
     "api.${CLUSTER_NAME}.${BASE_DOMAIN}" \
     "api-int.${CLUSTER_NAME}.${BASE_DOMAIN}" | sudo tee -a /etc/hosts
+
 # DNS Check
 echo "1.2.3.4 xxxtestxxx.${BASE_DOMAIN}" | sudo tee -a /etc/hosts
 sudo systemctl restart libvirtd
@@ -255,7 +256,13 @@ echo "srv-host=xxxtestxxx.${BASE_DOMAIN},yyyayyy.${BASE_DOMAIN},2380,0,10" | sud
 sudo systemctl restart dnsmasq || err "systemctl restart dnsmasq failed"
 srv_dig=$(ssh -i ${HOME}/key -o StrictHostKeyChecking=no "root@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig srv +short 'xxxtestxxx.${BASE_DOMAIN}' 2> /dev/null" | grep -q -s "yyyayyy.${BASE_DOMAIN}") || \
     err "ERROR: Testing SRV record failed"
-
-
 sudo sed -i_bak -e "/xxxtestxxx/d" /etc/hosts
 sudo rm -f ${DNS_DIR}/xxxtestxxx.conf 
+
+# Create machines
+virt-install --name ${CLUSTER_NAME}-bootstrap \
+  --disk "${VM_DIR}/${CLUSTER_NAME}-bootstrap.qcow2,size=50" --ram ${BOOTSTRAP_MEM} --cpu host --vcpus ${BOOTSTRAP_CPU} \
+  --os-type linux --os-variant rhel7-unknown \
+  --network network=${VIRTUAL_NET},model=virtio --noreboot --noautoconsole \
+  --location rhcos-install/ \
+  --extra-args "nomodeset rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=vda coreos.inst.image_url=http://${LBIP}:${WS_PORT}/${RHCOS_IMAGE} coreos.inst.ignition_url=http://${LBIP}:${WS_PORT}/bootstrap.ign" > /dev/null || err "Creating boostrap vm failed"
