@@ -3,6 +3,11 @@
 CLUSTER_NAME=${CLUSTER_NAME:-"cluster1"}
 BASE_DOMAIN=${BASE_DOMAIN:-"hobgoblin.org"}
 N_MASTER=${N_MASTER:-"3"}
+N_WORKER=${N_WORK:-"2"}
+for i in $(seq 1 ${N_WORKER}); do
+    sudo virsh destroy ${CLUSTER_NAME}-worker-${i} || /bin/true
+    sudo virsh undefine ${CLUSTER_NAME}-worker-${i} --remove-all-storage || /bin/true
+done
 for i in $(seq 1 ${N_MASTER}); do
     sudo virsh destroy ${CLUSTER_NAME}-master-${i} || /bin/true
     sudo virsh undefine ${CLUSTER_NAME}-master-${i} --remove-all-storage || /bin/true

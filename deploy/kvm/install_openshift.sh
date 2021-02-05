@@ -20,8 +20,8 @@ RHCOS_VERSION=${RHCOS_VERSION:="4.6/4.6.8"}
 RHCOS_IMAGE="rhcos-metal.x86_64.raw.gz"
 RHCOS_KERNEL="rhcos-live-kernel-x86_64"
 RHCOS_INITRAMFS="rhcos-live-initramfs.x86_64.img"
-N_MASTER=${N_MAST:-"3"}
-N_WORKER=${N_WORK:-"2"}
+N_MASTER=${N_MASTER:-"3"}
+N_WORKER=${N_WORKER:-"2"}
 MASTER_CPU=${MASTER_CPU:-"4"}
 MASTER_MEM=${MASTER_MEM:-"16000"}
 WORKER_CPU=${WORKER_CPU:-"2"}
@@ -267,7 +267,6 @@ sudo virt-install --name ${CLUSTER_NAME}-bootstrap \
   --location rhcos-install/ \
   --extra-args "nomodeset rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=vda coreos.inst.image_url=http://${LBIP}:${WS_PORT}/${RHCOS_IMAGE} coreos.inst.ignition_url=http://${LBIP}:${WS_PORT}/bootstrap.ign" > /dev/null || err "Creating boostrap vm failed"
 
-
 for i in $(seq 1 ${N_MASTER}); do
   sudo virt-install --name ${CLUSTER_NAME}-master-${i} \
     --disk "${VM_DIR}/${CLUSTER_NAME}-master-${i}.qcow2,size=50" --ram ${MASTER_MEM} --cpu host --vcpus ${MASTER_CPU} \
@@ -275,4 +274,14 @@ for i in $(seq 1 ${N_MASTER}); do
     --network network=${VIRTUAL_NET},model=virtio --noreboot --noautoconsole \
     --location rhcos-install/ \
     --extra-args "nomodeset rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=vda coreos.inst.image_url=http://${LBIP}:${WS_PORT}/${RHCOS_IMAGE} coreos.inst.ignition_url=http://${LBIP}:${WS_PORT}/master.ign" > /dev/null || err "Creating master-${i} vm failed "
+done
+
+for i in $(seq 1 ${N_WORKER}); do
+
+  sudo virt-install --name ${CLUSTER_NAME}-worker-${i} \
+    --disk "${VM_DIR}/${CLUSTER_NAME}-worker-${i}.qcow2,size=50" --ram ${WORKER_MEM} --cpu host --vcpus ${WORKER_CPU} \
+    --os-type linux --os-variant rhel7-unknown \
+    --network network=${VIRTUAL_NET},model=virtio --noreboot --noautoconsole \
+    --location rhcos-install/ \
+    --extra-args "nomodeset rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=vda coreos.inst.image_url=http://${LBIP}:${WS_PORT}/${RHCOS_IMAGE} coreos.inst.ignition_url=http://${LBIP}:${WS_PORT}/worker.ign" > /dev/null || err "Creating worker-${i} vm failed "
 done
