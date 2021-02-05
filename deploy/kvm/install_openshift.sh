@@ -285,3 +285,8 @@ for i in $(seq 1 ${N_WORKER}); do
     --location rhcos-install/ \
     --extra-args "nomodeset rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=vda coreos.inst.image_url=http://${LBIP}:${WS_PORT}/${RHCOS_IMAGE} coreos.inst.ignition_url=http://${LBIP}:${WS_PORT}/worker.ign" > /dev/null || err "Creating worker-${i} vm failed "
 done
+
+while rvms=$(virsh list --name | grep "${CLUSTER_NAME}-master-\|${CLUSTER_NAME}-worker-\|${CLUSTER_NAME}-bootstrap" 2> /dev/null); do
+    sleep 15
+    echo "  --> VMs with pending installation: $(echo "$rvms" | tr '\n' ' ')"
+done
