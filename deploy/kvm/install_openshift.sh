@@ -209,3 +209,16 @@ for i in $(seq 1 ${N_MASTER})
 do
     echo "  server master-${i} master-${i}.${CLUSTER_NAME}.${BASE_DOMAIN}:443 check" >> haproxy.cfg
 done
+
+cp "${DOWNLOADS_DIR}/CentOS-7-x86_64-GenericCloud.qcow2" "${VM_DIR}/${CLUSTER_NAME}-lb.qcow2"
+
+virt-customize -a "${VM_DIR}/${CLUSTER_NAME}-lb.qcow2" \
+    --uninstall cloud-init --ssh-inject root:file:${OPENSHIFT_PUB_KEY} --selinux-relabel --install haproxy --install bind-utils \
+    --copy-in install_dir/bootstrap.ign:/opt/ --copy-in install_dir/master.ign:/opt/ --copy-in install_dir/worker.ign:/opt/ \
+    --copy-in "${DOWNLOADS_DIR}/${RHCOS_IMAGE}":/opt/ --copy-in tmpws.service:/etc/systemd/system/ \
+    --copy-in haproxy.cfg:/etc/haproxy/ \
+    --run-command "systemctl daemon-reload" --run-command "systemctl enable tmpws.service"
+
+virt-install --import --name ${CLUSTER_NAME}-lb --disk "${VM_DIR}/${CLUSTER_NAME}-lb.qcow2" \
+    --memory ${LOADBALANCER_MEM} --cpu host --vcpus ${LOADBALANCER_CPU} --os-type linux --os-variant rhel7-unknown --network network=${VIRTUAL_NET},model=virtio \
+    --noreboot --noautoconsole
