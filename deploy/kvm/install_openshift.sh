@@ -36,7 +36,7 @@ CLUSTER_NAME=${CLUSTER_NAME:-"cluster1"}
 INSTALL_DIR=${INSTALL_DIR:-"${HOME}/install-${CLUSTER_NAME}"}
 DOWNLOADS_DIR=${DOWNLOADS_DIR:-"${HOME}/downloads-${CLUSTER_NAME}"}
 
-DNS_DIR="/etc/NetworkManager/dnsmasq.d"
+DNS_DIR="/etc/dnsmasq.d"
 VM_DIR="/var/lib/libvirt/images"
 OCP_MIRROR="https://mirror.openshift.com/pub/openshift-v4/clients/ocp"
 RHCOS_MIRROR="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos"
@@ -250,5 +250,12 @@ fwd_dig=$(ssh -i ${HOME}/key -o StrictHostKeyChecking=no "root@lb.${CLUSTER_NAME
 [[ "$?" == "0" && "$fwd_dig" = "1.2.3.4" ]] || err "Testing DNS forward record failed ($fwd_dig)"
 rev_dig=$(ssh -i ${HOME}/key -o StrictHostKeyChecking=no "root@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig +short -x '1.2.3.4' 2> /dev/null")
 [[ "$?" -eq "0" &&  "$rev_dig" = "xxxtestxxx.${BASE_DOMAIN}." ]] || err "Testing DNS reverse record failed ($rev_dig)"
-sudo sed -i_bak -e "/xxxtestxxx/d" /etc/hosts
 
+echo "srv-host=xxxtestxxx.${BASE_DOMAIN},yyyayyy.${BASE_DOMAIN},2380,0,10" | sudo tee ${DNS_DIR}/xxxtestxxx.conf
+sudo systemctl restart dnsmasq || err "systemctl restart dnsmasq failed"
+srv_dig=$(ssh -i ${HOME}/key -o StrictHostKeyChecking=no "root@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig srv +short 'xxxtestxxx.${BASE_DOMAIN}' 2> /dev/null" | grep -q -s "yyyayyy.${BASE_DOMAIN}") || \
+    err "ERROR: Testing SRV record failed"
+
+
+sudo sed -i_bak -e "/xxxtestxxx/d" /etc/hosts
+sudo rm -f ${DNS_DIR}/xxxtestxxx.conf 
