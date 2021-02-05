@@ -260,9 +260,19 @@ sudo sed -i_bak -e "/xxxtestxxx/d" /etc/hosts
 sudo rm -f ${DNS_DIR}/xxxtestxxx.conf 
 
 # Create machines
-virt-install --name ${CLUSTER_NAME}-bootstrap \
+sudo virt-install --name ${CLUSTER_NAME}-bootstrap \
   --disk "${VM_DIR}/${CLUSTER_NAME}-bootstrap.qcow2,size=50" --ram ${BOOTSTRAP_MEM} --cpu host --vcpus ${BOOTSTRAP_CPU} \
   --os-type linux --os-variant rhel7-unknown \
   --network network=${VIRTUAL_NET},model=virtio --noreboot --noautoconsole \
   --location rhcos-install/ \
   --extra-args "nomodeset rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=vda coreos.inst.image_url=http://${LBIP}:${WS_PORT}/${RHCOS_IMAGE} coreos.inst.ignition_url=http://${LBIP}:${WS_PORT}/bootstrap.ign" > /dev/null || err "Creating boostrap vm failed"
+
+
+for i in $(seq 1 ${N_MAST}); do
+  sudo virt-install --name ${CLUSTER_NAME}-master-${i} \
+    --disk "${VM_DIR}/${CLUSTER_NAME}-master-${i}.qcow2,size=50" --ram ${MASTER_MEM} --cpu host --vcpus ${MASTER_CPU} \
+    --os-type linux --os-variant rhel7-unknown \
+    --network network=${VIRTUAL_NET},model=virtio --noreboot --noautoconsole \
+    --location rhcos-install/ \
+    --extra-args "nomodeset rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=vda coreos.inst.image_url=http://${LBIP}:${WS_PORT}/${RHCOS_IMAGE} coreos.inst.ignition_url=http://${LBIP}:${WS_PORT}/master.ign" > /dev/null || err "Creating master-${i} vm failed "
+done
