@@ -14,6 +14,7 @@ err() {
 [[ -n "${OPENSHIFT_PULL_SECRET}" ]] || err "set OPENSHIFT_PULL_SECRET env variable"
 [[ -n "${OPENSHIFT_PUB_KEY}" ]] || err "set OPENSHIFT_PUB_KEY env variable"
 
+OPENSHIFT_PUB_KEY_FILE="sshkey.pub"
 OCP_VERSION=${OCP_VERSION:-"4.5.21"}
 RHCOS_VERSION=${RHCOS_VERSION:="4.6/4.6.8"}
 RHCOS_IMAGE="rhcos-metal.x86_64.raw.gz"
@@ -210,15 +211,15 @@ do
     echo "  server master-${i} master-${i}.${CLUSTER_NAME}.${BASE_DOMAIN}:443 check" >> haproxy.cfg
 done
 
-cp "${DOWNLOADS_DIR}/CentOS-7-x86_64-GenericCloud.qcow2" "${VM_DIR}/${CLUSTER_NAME}-lb.qcow2"
+sudo cp "${DOWNLOADS_DIR}/CentOS-7-x86_64-GenericCloud.qcow2" "${VM_DIR}/${CLUSTER_NAME}-lb.qcow2"
 
-virt-customize -a "${VM_DIR}/${CLUSTER_NAME}-lb.qcow2" \
-    --uninstall cloud-init --ssh-inject root:file:${OPENSHIFT_PUB_KEY} --selinux-relabel --install haproxy --install bind-utils \
-    --copy-in install_dir/bootstrap.ign:/opt/ --copy-in install_dir/master.ign:/opt/ --copy-in install_dir/worker.ign:/opt/ \
+sudo virt-customize -a "${VM_DIR}/${CLUSTER_NAME}-lb.qcow2" \
+    --uninstall cloud-init --ssh-inject root:file:${OPENSHIFT_PUB_KEY_FILE} --selinux-relabel --install haproxy --install bind-utils \
+    --copy-in ${INSTALL_DIR}/bootstrap.ign:/opt/ --copy-in ${INSTALL_DIR}/master.ign:/opt/ --copy-in ${INSTALL_DIR}/worker.ign:/opt/ \
     --copy-in "${DOWNLOADS_DIR}/${RHCOS_IMAGE}":/opt/ --copy-in tmpws.service:/etc/systemd/system/ \
     --copy-in haproxy.cfg:/etc/haproxy/ \
     --run-command "systemctl daemon-reload" --run-command "systemctl enable tmpws.service"
 
-virt-install --import --name ${CLUSTER_NAME}-lb --disk "${VM_DIR}/${CLUSTER_NAME}-lb.qcow2" \
+sudo virt-install --import --name ${CLUSTER_NAME}-lb --disk "${VM_DIR}/${CLUSTER_NAME}-lb.qcow2" \
     --memory ${LOADBALANCER_MEM} --cpu host --vcpus ${LOADBALANCER_CPU} --os-type linux --os-variant rhel7-unknown --network network=${VIRTUAL_NET},model=virtio \
     --noreboot --noautoconsole
