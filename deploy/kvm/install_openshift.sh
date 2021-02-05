@@ -11,8 +11,8 @@ err() {
     exit 1
 }
 
-[[ -z ${OPENSHIFT_PULL_SECRET} ]] || err "set OPENSHIFT_PULL_SECRET env variable"
-[[ -z ${OPENSHIFT_PUB_KEY} ]] || err "set OPENSHIFT_PUB_KEY env variable"
+[[ -n ${OPENSHIFT_PULL_SECRET} ]] || err "set OPENSHIFT_PULL_SECRET env variable"
+[[ -n ${OPENSHIFT_PUB_KEY} ]] || err "set OPENSHIFT_PUB_KEY env variable"
 
 OCP_VERSION=${OCP_VERSION:-"4.5.21"}
 RHCOS_VERSION=${RHCOS_VERSION:="4.6/4.6.8"}
@@ -123,7 +123,7 @@ sshKey: '${OPENSHIFT_PUB_KEY}'
 EOF
 
 
-./openshift-install create ignition-configs --dir=./${INSTALL_DIR}
+./openshift-install create ignition-configs --dir=${INSTALL_DIR}
 
 WS_PORT="1234"
 cat <<EOF > tmpws.service
