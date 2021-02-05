@@ -229,6 +229,9 @@ sudo virsh start ${CLUSTER_NAME}-lb
 while true; do
     sleep 5
     LBIP=$(sudo virsh domifaddr "${CLUSTER_NAME}-lb" | grep ipv4 | head -n1 | awk '{print $4}' | cut -d'/' -f1 2> /dev/null)
-    test "$?" -eq "0" -a -n "$LBIP"  && { echo "$LBIP"; break; }
+    if [[ "$?" == "0" and -n "$LBIP" ]]; then
+      echo "LBIP = ${LBIP}"
+      break
+    fi
 done
 MAC=$(virsh domifaddr "${CLUSTER_NAME}-lb" | grep ipv4 | head -n1 | awk '{print $2}')
