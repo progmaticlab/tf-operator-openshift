@@ -223,3 +223,12 @@ sudo virt-customize -a "${VM_DIR}/${CLUSTER_NAME}-lb.qcow2" \
 sudo virt-install --import --name ${CLUSTER_NAME}-lb --disk "${VM_DIR}/${CLUSTER_NAME}-lb.qcow2" \
     --memory ${LOADBALANCER_MEM} --cpu host --vcpus ${LOADBALANCER_CPU} --os-type linux --os-variant rhel7-unknown --network network=${VIRTUAL_NET},model=virtio \
     --noreboot --noautoconsole
+
+sudo virsh start ${CLUSTER_NAME}-lb
+
+while true; do
+    sleep 5
+    LBIP=$(virsh domifaddr "${CLUSTER_NAME}-lb" | grep ipv4 | head -n1 | awk '{print $4}' | cut -d'/' -f1 2> /dev/null)
+    test "$?" -eq "0" -a -n "$LBIP"  && { echo "$LBIP"; break; }
+done
+MAC=$(virsh domifaddr "${CLUSTER_NAME}-lb" | grep ipv4 | head -n1 | awk '{print $2}')
