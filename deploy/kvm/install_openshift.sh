@@ -7,12 +7,12 @@ my_dir="$(dirname $my_file)"
 start_ts=$(date +%s)
 
 err() {
-    echo "ERROR ${1}"
+    echo "${1}"
     exit 1
 }
 
-[[ -n ${OPENSHIFT_PULL_SECRET} ]] || err "set OPENSHIFT_PULL_SECRET env variable"
-[[ -n ${OPENSHIFT_PUB_KEY} ]] || err "set OPENSHIFT_PUB_KEY env variable"
+[[ -n "${OPENSHIFT_PULL_SECRET}" ]] || err "set OPENSHIFT_PULL_SECRET env variable"
+[[ -n "${OPENSHIFT_PUB_KEY}" ]] || err "set OPENSHIFT_PUB_KEY env variable"
 
 OCP_VERSION=${OCP_VERSION:-"4.5.21"}
 RHCOS_VERSION=${RHCOS_VERSION:="4.6/4.6.8"}
@@ -34,10 +34,6 @@ BASE_DOMAIN=${BASE_DOMAIN:-"hobgoblin.org"}
 CLUSTER_NAME=${CLUSTER_NAME:-"cluster1"}
 INSTALL_DIR=${INSTALL_DIR:-"${HOME}/install-${CLUSTER_NAME}"}
 DOWNLOADS_DIR=${DOWNLOADS_DIR:-"${HOME}/downloads-${CLUSTER_NAME}"}
-
-
-[[ -z ${PULL_SECRET} ]] || err "ERROR: set PULL_SECRET env variable"
-[[ -z ${OPENSHIFT_PUB_KEY} ]] || err "ERROR: set OPENSHIFT_PUB_KEY env variable"
 
 DNS_DIR="/etc/NetworkManager/dnsmasq.d"
 VM_DIR="/var/lib/libvirt/images"
