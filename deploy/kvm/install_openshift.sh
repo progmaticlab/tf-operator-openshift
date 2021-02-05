@@ -268,7 +268,7 @@ sudo virt-install --name ${CLUSTER_NAME}-bootstrap \
   --extra-args "nomodeset rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=vda coreos.inst.image_url=http://${LBIP}:${WS_PORT}/${RHCOS_IMAGE} coreos.inst.ignition_url=http://${LBIP}:${WS_PORT}/bootstrap.ign" > /dev/null || err "Creating boostrap vm failed"
 
 
-for i in $(seq 1 ${N_MAST}); do
+for i in $(seq 1 ${N_MASTER}); do
   sudo virt-install --name ${CLUSTER_NAME}-master-${i} \
     --disk "${VM_DIR}/${CLUSTER_NAME}-master-${i}.qcow2,size=50" --ram ${MASTER_MEM} --cpu host --vcpus ${MASTER_CPU} \
     --os-type linux --os-variant rhel7-unknown \
