@@ -234,9 +234,9 @@ while true; do
       break
     fi
 done
-MAC=$(virsh domifaddr "${CLUSTER_NAME}-lb" | grep ipv4 | head -n1 | awk '{print $2}')
+MAC=$(sudo virsh domifaddr "${CLUSTER_NAME}-lb" | grep ipv4 | head -n1 | awk '{print $2}')
 # DHCP Reservation
-virsh net-update ${VIRTUAL_NET} add-last ip-dhcp-host --xml "<host mac='$MAC' ip='$LBIP'/>" --live --config
+sudo virsh net-update ${VIRTUAL_NET} add-last ip-dhcp-host --xml "<host mac='$MAC' ip='$LBIP'/>" --live --config
 
 # Adding /etc/hosts entry for LB IP
 sudo echo  "$LBIP lb.${CLUSTER_NAME}.${BASE_DOMAIN}" \
@@ -244,7 +244,6 @@ sudo echo  "$LBIP lb.${CLUSTER_NAME}.${BASE_DOMAIN}" \
     "api-int.${CLUSTER_NAME}.${BASE_DOMAIN}" >> /etc/hosts
 
 # DNS Check
-
 echo "1.2.3.4 xxxtestxxx.${BASE_DOMAIN}" >> /etc/hosts
 systemctl restart libvirtd
 sleep 5
