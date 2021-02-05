@@ -290,3 +290,16 @@ while rvms=$(virsh list --name | grep "${CLUSTER_NAME}-master-\|${CLUSTER_NAME}-
     sleep 15
     echo "  --> VMs with pending installation: $(echo "$rvms" | tr '\n' ' ')"
 done
+
+echo "local=/${CLUSTER_NAME}.${BASE_DOMAIN}/" | sudo tee ${DNS_DIR}/${CLUSTER_NAME}.conf || err "failed"
+
+sudo virsh start ${CLUSTER_NAME}-bootstrap || err "virsh start ${CLUSTER_NAME}-bootstrap failed"
+
+for i in $(seq 1 ${N_MASTER}); do
+    sudo virsh start ${CLUSTER_NAME}-master-${i} || err "virsh start ${CLUSTER_NAME}-master-${i} failed"
+done
+
+for i in $(seq 1 ${N_WORKER}); do
+do
+    sudo virsh start ${CLUSTER_NAME}-worker-${i} || err "virsh start ${CLUSTER_NAME}-worker-${i} failed"
+done
