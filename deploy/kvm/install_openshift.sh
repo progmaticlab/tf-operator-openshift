@@ -229,9 +229,24 @@ sudo virsh start ${CLUSTER_NAME}-lb
 while true; do
     sleep 5
     LBIP=$(sudo virsh domifaddr "${CLUSTER_NAME}-lb" | grep ipv4 | head -n1 | awk '{print $4}' | cut -d'/' -f1 2> /dev/null)
-    if [[ "$?" == "0" and -n "$LBIP" ]]; then
+    if [[ "$?" == "0" && -n "$LBIP" ]]; then
       echo "LBIP = ${LBIP}"
       break
     fi
 done
 MAC=$(virsh domifaddr "${CLUSTER_NAME}-lb" | grep ipv4 | head -n1 | awk '{print $2}')
+# DHCP Reservation
+virsh net-update ${VIRTUAL_NET} add-last ip-dhcp-host --xml "<host mac='$MAC' ip='$LBIP'/>" --live --config
+
+# Adding /etc/hosts entry for LB IP
+sudo echo  "$LBIP lb.${CLUSTER_NAME}.${BASE_DOMAIN}" \
+    "api.${CLUSTER_NAME}.${BASE_DOMAIN}" \
+    "api-int.${CLUSTER_NAME}.${BASE_DOMAIN}" >> /etc/hosts
+
+# DNS Check
+
+echo "1.2.3.4 xxxtestxxx.${BASE_DOMAIN}" >> /etc/hosts
+systemctl restart libvirtd
+sleep 5
+fwd_dig=$(ssh -i ${HOME}/key "root@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig +short 'xxxtestxxx.${BASE_DOMAIN}' 2> /dev/null")
+[[ "$?" == "0" && "$fwd_dig" = "1.2.3.4" ]] || err "Testing DNS forward record failed ($fwd_dig)"
