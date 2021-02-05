@@ -244,7 +244,7 @@ echo  "$LBIP lb.${CLUSTER_NAME}.${BASE_DOMAIN}" \
     "api-int.${CLUSTER_NAME}.${BASE_DOMAIN}" | sudo tee -a /etc/hosts
 
 # DNS Check
-systemctl restart libvirtd
+sudo systemctl restart libvirtd
 sleep 5
 fwd_dig=$(ssh -i ${HOME}/key "root@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig +short 'xxxtestxxx.${BASE_DOMAIN}' 2> /dev/null")
 [[ "$?" == "0" && "$fwd_dig" = "1.2.3.4" ]] || err "Testing DNS forward record failed ($fwd_dig)"
