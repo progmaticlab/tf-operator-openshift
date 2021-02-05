@@ -239,12 +239,11 @@ MAC=$(sudo virsh domifaddr "${CLUSTER_NAME}-lb" | grep ipv4 | head -n1 | awk '{p
 sudo virsh net-update ${VIRTUAL_NET} add-last ip-dhcp-host --xml "<host mac='$MAC' ip='$LBIP'/>" --live --config
 
 # Adding /etc/hosts entry for LB IP
-sudo echo  "$LBIP lb.${CLUSTER_NAME}.${BASE_DOMAIN}" \
+echo  "$LBIP lb.${CLUSTER_NAME}.${BASE_DOMAIN}" \
     "api.${CLUSTER_NAME}.${BASE_DOMAIN}" \
-    "api-int.${CLUSTER_NAME}.${BASE_DOMAIN}" >> /etc/hosts
+    "api-int.${CLUSTER_NAME}.${BASE_DOMAIN}" | sudo tee -a /etc/hosts
 
 # DNS Check
-echo "1.2.3.4 xxxtestxxx.${BASE_DOMAIN}" >> /etc/hosts
 systemctl restart libvirtd
 sleep 5
 fwd_dig=$(ssh -i ${HOME}/key "root@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig +short 'xxxtestxxx.${BASE_DOMAIN}' 2> /dev/null")
