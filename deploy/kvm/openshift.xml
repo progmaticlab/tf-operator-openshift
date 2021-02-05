@@ -1,0 +1,11 @@
+# This is exaple of openshift virtual network configuration
+<network>
+  <name>openshift</name>
+  <bridge name='openshift0'/>
+  <forward/>
+  <ip address='192.168.134.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.134.2' end='192.168.134.254'/>
+    </dhcp>
+  </ip>
+</network>
