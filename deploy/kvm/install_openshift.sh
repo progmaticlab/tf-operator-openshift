@@ -6,7 +6,7 @@ my_file=$(realpath "$0")
 my_dir="$(dirname $my_file)"
 start_ts=$(date +%s)
 
-err() {
+function err() {
     echo "${1}"
     exit 1
 }
