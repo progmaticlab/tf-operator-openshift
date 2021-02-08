@@ -419,3 +419,16 @@ ssh -i ${OPENSHIFT_SSH_KEY} "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOM
     "sed -i '/bootstrap\.${CLUSTER_NAME}\.${BASE_DOMAIN}/d' /etc/haproxy/haproxy.cfg" || err "failed"
 ssh -i ${OPENSHIFT_SSH_KEY} "lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "systemctl restart haproxy" || err "failed"; ok
 
+nodes_ready=0
+nodes_total=$(( $N_MAST + $N_WORK ))
+while true; do
+  nodes_ready=$(./oc get nodes | grep 'Ready' | wc -l)
+  for csr in $(./oc get csr 2> /dev/null | grep -w 'Pending' | awk '{print $1}'); do
+    ./oc adm certificate approve "$csr" 2> /dev/null || true
+    output_delay=0
+  done
+  [[ "$nodes_ready" -ge "$nodes_total" ]] && break
+  sleep 15
+done
+
+./openshift-install --dir=${INSTALL_DIR} wait-for install-complete
