@@ -376,7 +376,9 @@ while true; do
   fi
   sleep 3
 done
- 
+
+sudo virsh start ${CLUSTER_NAME}-bootstrap || err "virsh start ${CLUSTER_NAME}-bootstrap failed"
+
 for i in $(seq 1 ${N_MASTER}); do
   while true; do
     if ! sudo virsh list | grep "${CLUSTER_NAME}-master-${i}" > /dev/null ; then
