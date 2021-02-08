@@ -389,3 +389,13 @@ while true; do
 done
 ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "core@bootstrap.${CLUSTER_NAME}.${BASE_DOMAIN}" true || err "SSH to lb.${CLUSTER_NAME}.${BASE_DOMAIN} failed"
 
+while true; do
+  X="$(./oc get --raw / &> /dev/null)"
+  if [[ "$?" == "0" ]]; then 
+    echo "Kube API is up"
+    break
+  fi
+done
+
+export KUBECONFIG="${INSTALL_DIR}/auth/kubeconfig"
+./openshift-install --dir=${INSTALL_DIR} wait-for bootstrap-complete
