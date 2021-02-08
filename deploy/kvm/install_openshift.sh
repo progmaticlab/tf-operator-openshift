@@ -35,6 +35,8 @@ BASE_DOMAIN=${BASE_DOMAIN:-"hobgoblin.org"}
 CLUSTER_NAME=${CLUSTER_NAME:-"cluster1"}
 INSTALL_DIR=${INSTALL_DIR:-"${HOME}/install-${CLUSTER_NAME}"}
 DOWNLOADS_DIR=${DOWNLOADS_DIR:-"${HOME}/downloads-${CLUSTER_NAME}"}
+OPENSHIFT_SSH_KEY=${OPENSHIFT_SSH_KEY:-${HOME}/key}
+OPENSHIFT_SSH_USER=${OPENSHIFT_SSH_KEY:-"root"}
 
 DNS_DIR="/etc/dnsmasq.d"
 VM_DIR="/var/lib/libvirt/images"
@@ -247,14 +249,14 @@ echo  "$LBIP lb.${CLUSTER_NAME}.${BASE_DOMAIN}" \
 echo "1.2.3.4 xxxtestxxx.${BASE_DOMAIN}" | sudo tee -a /etc/hosts
 sudo systemctl restart libvirtd
 sleep 5
-fwd_dig=$(ssh -i ${HOME}/key -o StrictHostKeyChecking=no "root@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig +short 'xxxtestxxx.${BASE_DOMAIN}' 2> /dev/null")
+fwd_dig=$(ssh -i ${OPENSHIFT_SSH_KEY}-o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig +short 'xxxtestxxx.${BASE_DOMAIN}' 2> /dev/null")
 [[ "$?" == "0" && "$fwd_dig" = "1.2.3.4" ]] || err "Testing DNS forward record failed ($fwd_dig)"
-rev_dig=$(ssh -i ${HOME}/key -o StrictHostKeyChecking=no "root@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig +short -x '1.2.3.4' 2> /dev/null")
+rev_dig=$(ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig +short -x '1.2.3.4' 2> /dev/null")
 [[ "$?" -eq "0" &&  "$rev_dig" = "xxxtestxxx.${BASE_DOMAIN}." ]] || err "Testing DNS reverse record failed ($rev_dig)"
 
 echo "srv-host=xxxtestxxx.${BASE_DOMAIN},yyyayyy.${BASE_DOMAIN},2380,0,10" | sudo tee ${DNS_DIR}/xxxtestxxx.conf
 sudo systemctl restart dnsmasq || err "systemctl restart dnsmasq failed"
-srv_dig=$(ssh -i ${HOME}/key -o StrictHostKeyChecking=no "root@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig srv +short 'xxxtestxxx.${BASE_DOMAIN}' 2> /dev/null" | grep -q -s "yyyayyy.${BASE_DOMAIN}") || \
+srv_dig=$(ssh -i ${OPENSHIFT_SSH_KEY}-o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig srv +short 'xxxtestxxx.${BASE_DOMAIN}' 2> /dev/null" | grep -q -s "yyyayyy.${BASE_DOMAIN}") || \
     err "ERROR: Testing SRV record failed"
 sudo sed -i_bak -e "/xxxtestxxx/d" /etc/hosts
 sudo rm -f ${DNS_DIR}/xxxtestxxx.conf 
@@ -367,3 +369,14 @@ echo "address=/apps.${CLUSTER_NAME}.${BASE_DOMAIN}/${LBIP}" | sudo tee -a ${DNS_
 sudo systemctl restart libvirtd 
 sudo systemctl restart dnsmasq
 
+# Configuring haproxy in LB VM
+ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "semanage port -a -t http_port_t -p tcp 6443" || \
+    err "semanage port -a -t http_port_t -p tcp 6443 failed" 
+ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "semanage port -a -t http_port_t -p tcp 22623" || \
+    err "semanage port -a -t http_port_t -p tcp 22623 failed"
+ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "systemctl start haproxy" || \
+    err "systemctl start haproxy failed" 
+ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "systemctl -q enable haproxy" || \
+    err "systemctl enable haproxy failed" 
+ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "systemctl -q is-active haproxy" || \
+    err "haproxy not working as expected" 
