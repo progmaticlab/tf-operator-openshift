@@ -256,7 +256,7 @@ rev_dig=$(ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_S
 
 echo "srv-host=xxxtestxxx.${BASE_DOMAIN},yyyayyy.${BASE_DOMAIN},2380,0,10" | sudo tee ${DNS_DIR}/xxxtestxxx.conf
 sudo systemctl restart dnsmasq || err "systemctl restart dnsmasq failed"
-srv_dig=$(ssh -i ${OPENSHIFT_SSH_KEY}-o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig srv +short 'xxxtestxxx.${BASE_DOMAIN}' 2> /dev/null" | grep -q -s "yyyayyy.${BASE_DOMAIN}") || \
+srv_dig=$(ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig srv +short 'xxxtestxxx.${BASE_DOMAIN}' 2> /dev/null" | grep -q -s "yyyayyy.${BASE_DOMAIN}") || \
     err "ERROR: Testing SRV record failed"
 sudo sed -i_bak -e "/xxxtestxxx/d" /etc/hosts
 sudo rm -f ${DNS_DIR}/xxxtestxxx.conf 
