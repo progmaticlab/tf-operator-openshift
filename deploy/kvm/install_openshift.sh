@@ -4,6 +4,7 @@ set -ex
 
 my_file=$(realpath "$0")
 my_dir="$(dirname $my_file)"
+TF_OPERATOR_OPENSHIFT_DIR=$my_dir/../..
 start_ts=$(date +%s)
 
 function err() {
@@ -112,7 +113,7 @@ networking:
   clusterNetworks:
   - cidr: 10.128.0.0/14
     hostPrefix: 23
-  networkType: OpenShiftSDN
+  networkType: Contrail
   serviceNetwork:
   - 172.30.0.0/16
 platform:
@@ -121,6 +122,12 @@ pullSecret: '${OPENSHIFT_PULL_SECRET}'
 sshKey: '${OPENSHIFT_PUB_KEY}'
 EOF
 
+
+./openshift-install --dir $INSTALL_DIR create manifests
+
+rm -f ${INSTALL_DIR}/openshift/99_openshift-cluster-api_master-machines-*.yaml ${INSTALL_DIR}/openshift/99_openshift-cluster-api_worker-machineset-*.yaml
+
+${TF_OPERATOR_OPENSHIFT_DIR}/scripts/apply_install_manifests.sh ${INSTALL_DIR}
 
 ./openshift-install create ignition-configs --dir=${INSTALL_DIR}
 
