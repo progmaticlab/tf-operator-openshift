@@ -370,14 +370,31 @@ ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@l
 ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "systemctl -q is-active haproxy" || \
     err "haproxy not working as expected" 
 
-sudo virsh start ${CLUSTER_NAME}-bootstrap || err "virsh start ${CLUSTER_NAME}-bootstrap failed"
-
+while true; do
+  if ! sudo virsh list | grep "${CLUSTER_NAME}-bootstrap" > /dev/null ; then
+    break
+  fi
+  sleep 3
+done
+ 
 for i in $(seq 1 ${N_MASTER}); do
-    sudo virsh start ${CLUSTER_NAME}-master-${i} || err "virsh start ${CLUSTER_NAME}-master-${i} failed"
+  while true; do
+    if ! sudo virsh list | grep "${CLUSTER_NAME}-master-${i}" > /dev/null ; then
+      break
+    fi
+    sleep 3
+  done
+  sudo virsh start ${CLUSTER_NAME}-master-${i} || err "virsh start ${CLUSTER_NAME}-master-${i} failed"
 done
 
 for i in $(seq 1 ${N_WORKER}); do
-    sudo virsh start ${CLUSTER_NAME}-worker-${i} || err "virsh start ${CLUSTER_NAME}-worker-${i} failed"
+  while true; do
+    if ! sudo virsh list | grep "${CLUSTER_NAME}-worker-${i}" > /dev/null ; then
+      break
+    fi
+    sleep 3
+  done
+  sudo virsh start ${CLUSTER_NAME}-worker-${i} || err "virsh start ${CLUSTER_NAME}-worker-${i} failed"
 done
 
 
