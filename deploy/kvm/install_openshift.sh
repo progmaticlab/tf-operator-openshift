@@ -249,7 +249,7 @@ echo  "$LBIP lb.${CLUSTER_NAME}.${BASE_DOMAIN}" \
 echo "1.2.3.4 xxxtestxxx.${BASE_DOMAIN}" | sudo tee -a /etc/hosts
 sudo systemctl restart libvirtd
 sleep 5
-fwd_dig=$(ssh -i ${OPENSHIFT_SSH_KEY}-o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig +short 'xxxtestxxx.${BASE_DOMAIN}' 2> /dev/null")
+fwd_dig=$(ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig +short 'xxxtestxxx.${BASE_DOMAIN}' 2> /dev/null")
 [[ "$?" == "0" && "$fwd_dig" = "1.2.3.4" ]] || err "Testing DNS forward record failed ($fwd_dig)"
 rev_dig=$(ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "dig +short -x '1.2.3.4' 2> /dev/null")
 [[ "$?" -eq "0" &&  "$rev_dig" = "xxxtestxxx.${BASE_DOMAIN}." ]] || err "Testing DNS reverse record failed ($rev_dig)"
