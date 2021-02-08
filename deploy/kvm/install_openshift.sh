@@ -16,7 +16,7 @@ function err() {
 
 OPENSHIFT_PUB_KEY_FILE="sshkey.pub"
 OCP_VERSION=${OCP_VERSION:-"4.5.21"}
-RHCOS_VERSION=${RHCOS_VERSION:="4.6/4.6.8"}
+RHCOS_VERSION=${RHCOS_VERSION:="4.5/4.5.6"}
 RHCOS_IMAGE="rhcos-metal.x86_64.raw.gz"
 RHCOS_KERNEL="rhcos-live-kernel-x86_64"
 RHCOS_INITRAMFS="rhcos-live-initramfs.x86_64.img"
