@@ -295,17 +295,6 @@ done
 
 echo "local=/${CLUSTER_NAME}.${BASE_DOMAIN}/" | sudo tee ${DNS_DIR}/${CLUSTER_NAME}.conf || err "failed"
 
-# sudo virsh start ${CLUSTER_NAME}-bootstrap || err "virsh start ${CLUSTER_NAME}-bootstrap failed"
-
-# for i in $(seq 1 ${N_MASTER}); do
-#    sudo virsh start ${CLUSTER_NAME}-master-${i} || err "virsh start ${CLUSTER_NAME}-master-${i} failed"
-#done
-
-#for i in $(seq 1 ${N_WORKER}); do
-#    sudo virsh start ${CLUSTER_NAME}-worker-${i} || err "virsh start ${CLUSTER_NAME}-worker-${i} failed"
-#done
-
-
 while true; do
     sleep 5
     BSIP=$(sudo virsh domifaddr "${CLUSTER_NAME}-bootstrap" | grep ipv4 | head -n1 | awk '{print $4}' | cut -d'/' -f1 2> /dev/null)
@@ -380,3 +369,23 @@ ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@l
     err "systemctl enable haproxy failed" 
 ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "systemctl -q is-active haproxy" || \
     err "haproxy not working as expected" 
+
+sudo virsh start ${CLUSTER_NAME}-bootstrap || err "virsh start ${CLUSTER_NAME}-bootstrap failed"
+
+for i in $(seq 1 ${N_MASTER}); do
+    sudo virsh start ${CLUSTER_NAME}-master-${i} || err "virsh start ${CLUSTER_NAME}-master-${i} failed"
+done
+
+for i in $(seq 1 ${N_WORKER}); do
+    sudo virsh start ${CLUSTER_NAME}-worker-${i} || err "virsh start ${CLUSTER_NAME}-worker-${i} failed"
+done
+
+
+# Waiting for SSH access on Boostrap VM
+while true; do
+    sleep 1
+    ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no core@bootstrap.${CLUSTER_NAME}.${BASE_DOMAIN} true &> /dev/null || continue
+    break
+done
+ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "core@bootstrap.${CLUSTER_NAME}.${BASE_DOMAIN}" true || err "SSH to lb.${CLUSTER_NAME}.${BASE_DOMAIN} failed"
+
