@@ -410,3 +410,12 @@ ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "core@bootstrap.${CLUSTE
 
 export KUBECONFIG="${INSTALL_DIR}/auth/kubeconfig"
 ./openshift-install --dir=${INSTALL_DIR} wait-for bootstrap-complete
+
+# Remove bootstrap node
+sudo virsh destroy ${CLUSTER_NAME}-bootstrap > /dev/null || err "virsh destroy ${CLUSTER_NAME}-bootstrap failed"
+sudo virsh undefine ${CLUSTER_NAME}-bootstrap --remove-all-storage > /dev/null || err "virsh undefine ${CLUSTER_NAME}-bootstrap --remove-all-storage"
+
+ssh -i ${OPENSHIFT_SSH_KEY} "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" \
+    "sed -i '/bootstrap\.${CLUSTER_NAME}\.${BASE_DOMAIN}/d' /etc/haproxy/haproxy.cfg" || err "failed"
+ssh -i ${OPENSHIFT_SSH_KEY} "lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "systemctl restart haproxy" || err "failed"; ok
+
