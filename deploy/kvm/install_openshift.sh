@@ -415,9 +415,9 @@ export KUBECONFIG="${INSTALL_DIR}/auth/kubeconfig"
 sudo virsh destroy ${CLUSTER_NAME}-bootstrap > /dev/null || err "virsh destroy ${CLUSTER_NAME}-bootstrap failed"
 sudo virsh undefine ${CLUSTER_NAME}-bootstrap --remove-all-storage > /dev/null || err "virsh undefine ${CLUSTER_NAME}-bootstrap --remove-all-storage"
 
-ssh -i ${OPENSHIFT_SSH_KEY} "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" \
+ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" \
     "sed -i '/bootstrap\.${CLUSTER_NAME}\.${BASE_DOMAIN}/d' /etc/haproxy/haproxy.cfg" || err "failed"
-ssh -i ${OPENSHIFT_SSH_KEY} "lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "systemctl restart haproxy" || err "failed"; ok
+ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "systemctl restart haproxy" || err "failed"; ok
 
 nodes_ready=0
 nodes_total=$(( $N_MAST + $N_WORK ))
