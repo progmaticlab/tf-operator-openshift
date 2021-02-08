@@ -302,3 +302,68 @@ echo "local=/${CLUSTER_NAME}.${BASE_DOMAIN}/" | sudo tee ${DNS_DIR}/${CLUSTER_NA
 #for i in $(seq 1 ${N_WORKER}); do
 #    sudo virsh start ${CLUSTER_NAME}-worker-${i} || err "virsh start ${CLUSTER_NAME}-worker-${i} failed"
 #done
+
+
+while true; do
+    sleep 5
+    BSIP=$(sudo virsh domifaddr "${CLUSTER_NAME}-bootstrap" | grep ipv4 | head -n1 | awk '{print $4}' | cut -d'/' -f1 2> /dev/null)
+    if [[ "$?" == "0" && -n "${BSIP}" ]]; then
+      echo "Bootstrap IP: ${BSIP}"
+      break
+    fi
+done
+MAC=$(sudo virsh domifaddr "${CLUSTER_NAME}-bootstrap" | grep ipv4 | head -n1 | awk '{print $2}')
+
+# Adding DHCP reservation
+sudo virsh net-update ${VIRTAL_NET} add-last ip-dhcp-host --xml "<host mac='$MAC' ip='$BSIP'/>" --live --config > /dev/null || \
+    err "Adding DHCP reservation for bootstrap failed"
+
+# Adding /etc/hosts entry
+echo "$BSIP bootstrap.${CLUSTER_NAME}.${BASE_DOMAIN}" | sudo tee -a /etc/hosts
+
+for i in $(seq 1 ${N_MASTER}); do
+  while true; do
+    sleep 5
+    IP=$(sudo virsh domifaddr "${CLUSTER_NAME}-master-${i}" | grep ipv4 | head -n1 | awk '{print $4}' | cut -d'/' -f1 2> /dev/null)
+    if [[ "$?" == "0" && -n "${IP}" ]]; then
+      echo "master ${i} ip address is ${IP}"
+      break
+    fi
+  done
+  MAC=$(sudo virsh domifaddr "${CLUSTER_NAME}-master-${i}" | grep ipv4 | head -n1 | awk '{print $2}')
+  # Adding DHCP reservation
+  sudo virsh net-update ${VIRTUAL_NET} add-last ip-dhcp-host --xml "<host mac='$MAC' ip='$IP'/>" --live --config > /dev/null || \
+    err "Adding DHCP reservation for master ${i} failed"
+
+  # Adding /etc/hosts entry
+  echo "$IP master-${i}.${CLUSTER_NAME}.${BASE_DOMAIN}" \
+         "etcd-$((i-1)).${CLUSTER_NAME}.${BASE_DOMAIN}" | sudo tee -a /etc/hosts 
+
+  # Adding SRV record in dnsmasq
+  echo "srv-host=_etcd-server-ssl._tcp.${CLUSTER_NAME}.${BASE_DOM},etcd-$((i-1)).${CLUSTER_NAME}.${BASE_DOM},2380,0,10" | sudo tee -a ${DNS_DIR}/${CLUSTER_NAME}.conf
+done
+
+for i in $(seq 1 ${N_WORKER}); do
+  while true; do
+    sleep 5
+    IP=$(sudo virsh domifaddr "${CLUSTER_NAME}-worker-${i}" | grep ipv4 | head -n1 | awk '{print $4}' | cut -d'/' -f1 2> /dev/null)
+    if [[ "$?" == "0" && -n ${IP} ]]; then
+      echo "worker ${i} ip addres is ${IP}"
+      break
+    fi
+  done
+  MAC=$(virsh domifaddr "${CLUSTER_NAME}-worker-${i}" | grep ipv4 | head -n1 | awk '{print $2}')
+
+  # Adding DHCP reservation
+  sudo virsh net-update ${VIRTUAL_NET} add-last ip-dhcp-host --xml "<host mac='$MAC' ip='$IP'/>" --live --config > /dev/null || \
+    err "Adding DHCP reservation for worker ${i} failed"
+  echo "$IP worker-${i}.${CLUSTER_NAME}.${BASE_DOMAIN}" | sudo tee -a /etc/hosts 
+done
+
+# Adding wild-card (*.apps) dns record in dnsmasq
+echo "address=/apps.${CLUSTER_NAME}.${BASE_DOMAIN}/${LBIP}" | sudo tee -a ${DNS_DIR}/${CLUSTER_NAME}.conf
+
+# Resstarting libvirt and dnsmasq
+sudo systemctl restart libvirtd 
+sudo systemctl restart dnsmasq
+
