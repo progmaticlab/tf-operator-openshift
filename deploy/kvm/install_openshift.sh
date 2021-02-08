@@ -315,7 +315,7 @@ done
 MAC=$(sudo virsh domifaddr "${CLUSTER_NAME}-bootstrap" | grep ipv4 | head -n1 | awk '{print $2}')
 
 # Adding DHCP reservation
-sudo virsh net-update ${VIRTAL_NET} add-last ip-dhcp-host --xml "<host mac='$MAC' ip='$BSIP'/>" --live --config > /dev/null || \
+sudo virsh net-update ${VIRTUAL_NET} add-last ip-dhcp-host --xml "<host mac='$MAC' ip='$BSIP'/>" --live --config > /dev/null || \
     err "Adding DHCP reservation for bootstrap failed"
 
 # Adding /etc/hosts entry
