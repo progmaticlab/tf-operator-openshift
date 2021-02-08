@@ -18,8 +18,8 @@ OPENSHIFT_PUB_KEY_FILE="sshkey.pub"
 OCP_VERSION=${OCP_VERSION:-"4.5.21"}
 RHCOS_VERSION=${RHCOS_VERSION:="4.5/4.5.6"}
 RHCOS_IMAGE="rhcos-metal.x86_64.raw.gz"
-RHCOS_KERNEL="rhcos-live-kernel-x86_64"
-RHCOS_INITRAMFS="rhcos-live-initramfs.x86_64.img"
+RHCOS_KERNEL="rhcos-installer-kernel-x86_64"
+RHCOS_INITRAMFS="rhcos-installer-initramfs.x86_64.img"
 N_MASTER=${N_MASTER:-"3"}
 N_WORKER=${N_WORKER:-"2"}
 MASTER_CPU=${MASTER_CPU:-"4"}
