@@ -392,7 +392,7 @@ for i in $(seq 1 ${N_WORKER}); do
     if ! sudo virsh list | grep "${CLUSTER_NAME}-worker-${i}" > /dev/null ; then
       break
     fi
-    sleep 3
+    sleep 5
   done
   sudo virsh start ${CLUSTER_NAME}-worker-${i} || err "virsh start ${CLUSTER_NAME}-worker-${i} failed"
 done
@@ -400,7 +400,7 @@ done
 
 # Waiting for SSH access on Boostrap VM
 while true; do
-    sleep 1
+    sleep 15
     ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no core@bootstrap.${CLUSTER_NAME}.${BASE_DOMAIN} true &> /dev/null || continue
     break
 done
