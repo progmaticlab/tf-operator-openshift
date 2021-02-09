@@ -125,6 +125,8 @@ EOF
 
 ./openshift-install --dir $INSTALL_DIR create manifests
 
+sed -i -E "s/mastersSchedulable: true/mastersSchedulable: false/" ${INSTALL_DIR}/manifests/cluster-scheduler-02-config.yml
+
 rm -f ${INSTALL_DIR}/openshift/99_openshift-cluster-api_master-machines-*.yaml ${INSTALL_DIR}/openshift/99_openshift-cluster-api_worker-machineset-*.yaml
 
 ${TF_OPERATOR_OPENSHIFT_DIR}/scripts/apply_install_manifests.sh ${INSTALL_DIR}
