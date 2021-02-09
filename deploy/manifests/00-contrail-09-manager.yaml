@@ -19,11 +19,11 @@ spec:
         serviceConfiguration:
           containers:
             - name: cassandra
-              image: cassandra:3.11.4
+              image: tf-nexus.progmaticlab.com:5102/cassandra:3.11.4
             - name: init
               image: tf-nexus.progmaticlab.com:5102/python:3.8.2-alpine
             - name: init2
-              image: cassandra:3.11.4
+              image: tf-nexus.progmaticlab.com:5102/cassandra:3.11.4
     config:
       metadata:
         labels:
@@ -117,7 +117,7 @@ spec:
           - name: init
             image: tf-nexus.progmaticlab.com:5102/python:3.8.2-alpine
           - name: rabbitmq
-            image: rabbitmq:3.7
+            image: tf-nexus.progmaticlab.com:5102/rabbitmq:3.7
     webui:
       metadata:
         labels:
@@ -154,7 +154,7 @@ spec:
             - name: conf-init
               image: tf-nexus.progmaticlab.com:5102/python:3.8.2-alpine
             - name: zookeeper
-              image: zookeeper:3.5.5
+              image: tf-nexus.progmaticlab.com:5102/zookeeper:3.5.5
     kubemanagers:
     - metadata:
         labels:
