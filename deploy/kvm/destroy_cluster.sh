@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CLUSTER_NAME=${CLUSTER_NAME:-"cluster1"}
+CLUSTER_NAME=${CLUSTER_NAME:-"test1"}
 BASE_DOMAIN=${BASE_DOMAIN:-"hobgoblin.org"}
 N_MASTER=${N_MASTER:-"3"}
 N_WORKER=${N_WORK:-"2"}
