@@ -429,7 +429,7 @@ ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@l
 ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "${OPENSHIFT_SSH_USER}@lb.${CLUSTER_NAME}.${BASE_DOMAIN}" "systemctl restart haproxy" || err "failed"
 
 nodes_ready=0
-nodes_total=$(( $N_MAST + $N_WORK ))
+nodes_total=$(( $N_MASTER + $N_WORKER ))
 while true; do
   nodes_ready=$(./oc get nodes | grep 'Ready' | wc -l)
   for csr in $(./oc get csr 2> /dev/null | grep -w 'Pending' | awk '{print $1}'); do
