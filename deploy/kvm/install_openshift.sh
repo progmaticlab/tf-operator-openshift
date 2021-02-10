@@ -440,4 +440,23 @@ while true; do
   sleep 15
 done
 
+./oc patch ingresscontroller default -n openshift-ingress-operator \
+                --type merge \
+                --patch '{
+                    "spec":{
+                        "replicas": '${N_MASTER}',
+                        "nodePlacement":{
+                            "nodeSelector":{
+                                "matchLabels":{
+                                    "node-role.kubernetes.io/master":""
+                                }
+                            },
+                            "tolerations":[{
+                                "effect": "NoSchedule",
+                                "operator": "Exists"
+                            }]
+                        }
+                    }
+                }' 
+
 ./openshift-install --dir=${INSTALL_DIR} wait-for install-complete
