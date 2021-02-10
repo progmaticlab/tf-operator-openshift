@@ -34,6 +34,7 @@ LOADBALANCER_MEM=${LOADBALANCER_MEM:-"1024"}
 VIRTUAL_NET=${VIRTUAL_NET:-"openshift"}
 BASE_DOMAIN=${BASE_DOMAIN:-"hobgoblin.org"}
 CLUSTER_NAME=${CLUSTER_NAME:-"test1"}
+TF_MANIFESTS_DIR=${TF_MANIFESTS_DIR:-"$HOME"/tf-manifests-dir}
 INSTALL_DIR=${INSTALL_DIR:-"${HOME}/install-${CLUSTER_NAME}"}
 DOWNLOADS_DIR=${DOWNLOADS_DIR:-"${HOME}/downloads-${CLUSTER_NAME}"}
 OPENSHIFT_SSH_KEY=${OPENSHIFT_SSH_KEY:-${HOME}/key}
@@ -127,9 +128,9 @@ EOF
 
 sed -i -E "s/mastersSchedulable: true/mastersSchedulable: false/" ${INSTALL_DIR}/manifests/cluster-scheduler-02-config.yml
 
-rm -f ${INSTALL_DIR}/openshift/99_openshift-cluster-api_master-machines-*.yaml ${INSTALL_DIR}/openshift/99_openshift-cluster-api_worker-machineset-*.yaml
+# rm -f ${INSTALL_DIR}/openshift/99_openshift-cluster-api_master-machines-*.yaml ${INSTALL_DIR}/openshift/99_openshift-cluster-api_worker-machineset-*.yaml
 
-${TF_OPERATOR_OPENSHIFT_DIR}/scripts/apply_install_manifests.sh ${INSTALL_DIR}
+# ${TF_OPERATOR_OPENSHIFT_DIR}/scripts/apply_install_manifests.sh ${INSTALL_DIR}
 
 ./openshift-install create ignition-configs --dir=${INSTALL_DIR}
 
@@ -418,6 +419,13 @@ done
 ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "core@bootstrap.${CLUSTER_NAME}.${BASE_DOMAIN}" true || err "SSH to lb.${CLUSTER_NAME}.${BASE_DOMAIN} failed"
 
 export KUBECONFIG="${INSTALL_DIR}/auth/kubeconfig"
+
+rm -rf ${TF_MANIFESTS_DIR}
+mkdir -p ${TF_MANIFESTS_DIR}
+${TF_OPERATOR_OPENSHIFT_DIR}/scripts/apply_install_manifests.sh ${TF_MANIFESTS_DIR}
+
+exit 1
+
 ./openshift-install --dir=${INSTALL_DIR} wait-for bootstrap-complete
 
 # Remove bootstrap node
