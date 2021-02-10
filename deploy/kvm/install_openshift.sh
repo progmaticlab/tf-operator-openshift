@@ -440,6 +440,10 @@ while true; do
   sleep 15
 done
 
+until oc get ingresscontroller default -n openshift-ingress-operator -o name; do
+  sleep 15
+done
+
 ./oc patch ingresscontroller default -n openshift-ingress-operator \
                 --type merge \
                 --patch '{
