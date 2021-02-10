@@ -421,7 +421,8 @@ ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "core@bootstrap.${CLUSTE
 export KUBECONFIG="${INSTALL_DIR}/auth/kubeconfig"
 
 rm -rf ${TF_MANIFESTS_DIR}
-mkdir -p ${TF_MANIFESTS_DIR}
+mkdir -p ${TF_MANIFESTS_DIR}/openshift
+mkdir -p ${TF_MANIFESTS_DIR}/manifests
 ${TF_OPERATOR_OPENSHIFT_DIR}/scripts/apply_install_manifests.sh ${TF_MANIFESTS_DIR}
 
 exit 1
