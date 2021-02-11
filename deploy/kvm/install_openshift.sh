@@ -123,14 +123,16 @@ pullSecret: '${OPENSHIFT_PULL_SECRET}'
 sshKey: '${OPENSHIFT_PUB_KEY}'
 EOF
 
+rm -rf ${TF_MANIFESTS_DIR}
+mkdir -p ${TF_MANIFESTS_DIR}/openshift
+mkdir -p ${TF_MANIFESTS_DIR}/manifests
+${TF_OPERATOR_OPENSHIFT_DIR}/scripts/apply_install_manifests.sh ${TF_MANIFESTS_DIR}
 
 ./openshift-install --dir $INSTALL_DIR create manifests
 
 sed -i -E "s/mastersSchedulable: true/mastersSchedulable: false/" ${INSTALL_DIR}/manifests/cluster-scheduler-02-config.yml
 
-# rm -f ${INSTALL_DIR}/openshift/99_openshift-cluster-api_master-machines-*.yaml ${INSTALL_DIR}/openshift/99_openshift-cluster-api_worker-machineset-*.yaml
-
-# ${TF_OPERATOR_OPENSHIFT_DIR}/scripts/apply_install_manifests.sh ${INSTALL_DIR}
+cp ${TF_MANIFESTS_DIR}/openshift/* ${INSTALL_DIR}/manifests/
 
 ./openshift-install create ignition-configs --dir=${INSTALL_DIR}
 
@@ -420,12 +422,11 @@ ssh -i ${OPENSHIFT_SSH_KEY} -o StrictHostKeyChecking=no "core@bootstrap.${CLUSTE
 
 export KUBECONFIG="${INSTALL_DIR}/auth/kubeconfig"
 
-rm -rf ${TF_MANIFESTS_DIR}
-mkdir -p ${TF_MANIFESTS_DIR}/openshift
-mkdir -p ${TF_MANIFESTS_DIR}/manifests
-${TF_OPERATOR_OPENSHIFT_DIR}/scripts/apply_install_manifests.sh ${TF_MANIFESTS_DIR}
+until ./oc get pods; do
+  sleep 15
+done
 
-exit 1
+./oc apply -f ${TF_MANIFESTS_DIR}/manifests
 
 ./openshift-install --dir=${INSTALL_DIR} wait-for bootstrap-complete
 
