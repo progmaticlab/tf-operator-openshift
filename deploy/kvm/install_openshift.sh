@@ -132,7 +132,7 @@ ${TF_OPERATOR_OPENSHIFT_DIR}/scripts/apply_install_manifests.sh ${TF_MANIFESTS_D
 
 sed -i -E "s/mastersSchedulable: true/mastersSchedulable: false/" ${INSTALL_DIR}/manifests/cluster-scheduler-02-config.yml
 
-cp ${TF_MANIFESTS_DIR}/openshift/* ${INSTALL_DIR}/manifests/
+cp ${TF_MANIFESTS_DIR}/openshift/* ${INSTALL_DIR}/openshift/
 
 ./openshift-install create ignition-configs --dir=${INSTALL_DIR}
 
