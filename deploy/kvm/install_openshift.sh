@@ -426,7 +426,7 @@ until ./oc get pods; do
   sleep 15
 done
 
-until ./oc apply -f ${TF_MANIFESTS_DIR}/manifests
+until ./oc apply -f ${TF_MANIFESTS_DIR}/manifests; do
   sleep 15
 done
 
