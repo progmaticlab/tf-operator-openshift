@@ -426,7 +426,9 @@ until ./oc get pods; do
   sleep 15
 done
 
-./oc apply -f ${TF_MANIFESTS_DIR}/manifests
+until ./oc apply -f ${TF_MANIFESTS_DIR}/manifests
+  sleep 15
+done
 
 ./openshift-install --dir=${INSTALL_DIR} wait-for bootstrap-complete
 
